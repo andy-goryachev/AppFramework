@@ -1,0 +1,12 @@
+/build/
+/out/
+/user.home*/
+/user.data*/
+~*
+/*.jar
+.settings/
+/*.log
+/*.conf
+hs_err_pid*
+/test.out/
+/Private Notes.txt
