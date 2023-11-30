@@ -1,6 +1,5 @@
 // Copyright © 2023 Andy Goryachev <andy@goryachev.com>
 package goryachev.demo;
-import goryachev.fx.CPane;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 
@@ -17,8 +16,8 @@ public class DemoListWithPreviewPane
 	}
 
 	
-	protected Node createPreview(Entry item)
+	protected Node createPreview(Entry en)
 	{
-		return new CPane();
+		return new EntryPreviewPane(en);
 	}
 }

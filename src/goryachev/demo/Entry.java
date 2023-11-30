@@ -1,5 +1,6 @@
 // Copyright © 2023 Andy Goryachev <andy@goryachev.com>
 package goryachev.demo;
+import goryachev.fx.FxString;
 
 
 /**
@@ -7,11 +8,13 @@ package goryachev.demo;
  */
 public class Entry
 {
-	public final String title;
+	public final FxString title = new FxString();
+	public final FxString text = new FxString();
 	
 	
-	public Entry(String title)
+	public Entry(String title, String text)
 	{
-		this.title = title;
+		this.title.set(title);
+		this.text.set(text);
 	}
 }

@@ -1,5 +1,6 @@
 // Copyright © 2023 Andy Goryachev <andy@goryachev.com>
 package goryachev.demo;
+import goryachev.fx.FxButton;
 import goryachev.fx.FxMenuBar;
 import goryachev.fx.FxTabPane;
 import goryachev.fx.FxToolBar;
@@ -40,9 +41,9 @@ public class MainWindow extends FxWindow
 		
 		items.setAll
 		(
-			new Entry("1"),
-			new Entry("2"),
-			new Entry("3")
+			new Entry("1", "one"),
+			new Entry("2", "two\ntwo"),
+			new Entry("3", "three\nthree\nthree")
 		);
 		
 		listView = new DemoListWithPreviewPane(items);
@@ -82,7 +83,7 @@ public class MainWindow extends FxWindow
 	private FxToolBar createToolBar()
 	{
 		FxToolBar t = new FxToolBar();
-		t.add(new Button("#1"));
+		t.add(new FxButton("#1", this::addItem));
 		t.add(new Button("#2"));
 		t.add(new Button("#3"));
 		t.add(new Button("#4"));
@@ -109,5 +110,12 @@ public class MainWindow extends FxWindow
 		t.setContent(p);
 		t.setTooltip(new Tooltip(tooltip));
 		return t;
+	}
+	
+	
+	protected void addItem()
+	{
+		Entry en = new Entry(String.valueOf(System.currentTimeMillis()), "sample");
+		items.add(en);
 	}
 }
