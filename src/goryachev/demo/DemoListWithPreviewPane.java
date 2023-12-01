@@ -5,7 +5,7 @@ import javafx.scene.Node;
 
 
 /**
- * DemoListWithPreviewPane.
+ * Demo List With Preview Pane.
  */
 public class DemoListWithPreviewPane
 	extends ListWithPreviewPane<Entry>
@@ -14,7 +14,7 @@ public class DemoListWithPreviewPane
 	{
 		super(items);
 
-		// TODO set cell height
+		// TODO set cell height on first item or font change
 		table.setFixedCellSize(75);
 	}
 
