@@ -19,16 +19,14 @@ public class GalleryIcon
 	}
 	
 	
-	public GalleryIcon(double sz, int cols, int rows)
+	public GalleryIcon(double size, int cols, int rows)
 	{
-		super(sz);
+		super(size);
 		
-		double N = 4;
-		double dx = sz / (N * cols + (cols > 0 ? cols - 1 : 0));
-		double dy = sz / (N * rows + (rows > 0 ? rows - 1 : 0));
-		
-		double gap = dx;
-		double th = gap / 2.0;
+		double N = 3;
+		double dx = size / (N * cols + Math.max(0, cols - 1));
+		double dy = size / (N * rows + Math.max(0, rows - 1));
+		double th = size * 0.05 / Math.min(cols, rows);
 		double w = N * dx;
 		double h = N * dy;
 		
@@ -40,12 +38,12 @@ public class GalleryIcon
 		
 		for(int r=0; r<rows; r++)
 		{
-			double y0 = r * h + dy * (r > 0 ? gap * (r - 1) : 0);
+			double y0 = r * (h + dy);
 			double y1 = y0 + h;
 			
 			for(int c=0; c<cols; c++)
 			{
-				double x0 = c * w + dx * (c > 0 ? gap * (c - 1) : 0);
+				double x0 = c * (w + dx);
 				double x1 = x0 + w;
 				
 				p.moveto(x0, y0);

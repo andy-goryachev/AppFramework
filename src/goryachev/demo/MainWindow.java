@@ -6,7 +6,9 @@ import goryachev.fx.FxMenuBar;
 import goryachev.fx.FxTabPane;
 import goryachev.fx.FxToolBar;
 import goryachev.fx.FxWindow;
+import goryachev.fx.icon.FindIcon;
 import goryachev.fx.icon.GalleryIcon;
+import goryachev.fx.icon.HamburgerIcon;
 import goryachev.fx.icon.StarIcon;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -60,11 +62,11 @@ public class MainWindow extends FxWindow
 		FxTabPane sidePane = new FxTabPane();
 		sidePane.setSide(Side.LEFT);
 		int sz = 20;
-		sidePane.addTab(t(new StarIcon(sz, Color.BLACK), "List With Preview", listView));
-		sidePane.addTab(t(new GalleryIcon(sz, 2, 2), "Gallery View", galleryView));
+		sidePane.addTab(t(new StarIcon(sz, Color.GRAY), "List With Preview", listView));
+		sidePane.addTab(t(new GalleryIcon(sz - 6, 2, 2), "Gallery View", galleryView));
 		sidePane.addTab(t(new StarIcon(sz, Color.YELLOW), "Table View", tableView));
-		sidePane.addTab(t(new StarIcon(sz, Color.GRAY), null, null));
-		sidePane.addTab(t(new StarIcon(sz, Color.GRAY), null, null));
+		sidePane.addTab(t(new HamburgerIcon(sz), null, null));
+		sidePane.addTab(t(new FindIcon(sz), null, null));
 		
 		VBox vb = new VBox
 		(
