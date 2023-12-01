@@ -13,6 +13,9 @@ public class DemoListWithPreviewPane
 	public DemoListWithPreviewPane(ObservableList<Entry> items)
 	{
 		super(items);
+
+		// TODO set cell height
+		table.setFixedCellSize(75);
 	}
 
 	

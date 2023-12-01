@@ -1,6 +1,7 @@
 // Copyright © 2023 Andy Goryachev <andy@goryachev.com>
 package goryachev.demo;
 import goryachev.fx.FxButton;
+import goryachev.fx.FxDump;
 import goryachev.fx.FxMenuBar;
 import goryachev.fx.FxTabPane;
 import goryachev.fx.FxToolBar;
@@ -27,6 +28,7 @@ public class MainWindow extends FxWindow
 {
 	protected final TextField searchField;
 	protected final DemoListWithPreviewPane listView;
+	protected final GalleryView galleryView;
 	protected final ObservableList<Entry> items = FXCollections.observableArrayList();
 	
 	
@@ -48,11 +50,14 @@ public class MainWindow extends FxWindow
 		
 		listView = new DemoListWithPreviewPane(items);
 		
+		galleryView = new GalleryView();
+		
+		// TODO .tab-header-area
 		FxTabPane sidePane = new FxTabPane();
 		sidePane.setSide(Side.LEFT);
 		int sz = 20;
 		sidePane.addTab(t(new StarIcon(sz, Color.BLACK), "List With Preview", listView));
-		sidePane.addTab(t(new StarIcon(sz, Color.GRAY), null, null));
+		sidePane.addTab(t(new StarIcon(sz, Color.GRAY), "Gallery View", galleryView));
 		sidePane.addTab(t(new StarIcon(sz, Color.GRAY), null, null));
 		sidePane.addTab(t(new StarIcon(sz, Color.GRAY), null, null));
 		sidePane.addTab(t(new StarIcon(sz, Color.GRAY), null, null));
@@ -66,6 +71,8 @@ public class MainWindow extends FxWindow
 		setTop(vb);
 		setCenter(sidePane);
 		setBottom(createStatusBar());
+		
+		FxDump.attach(this);
 	}
 
 	
