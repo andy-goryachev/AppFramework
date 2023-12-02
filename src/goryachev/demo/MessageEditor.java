@@ -18,10 +18,11 @@ public class MessageEditor
 	public MessageEditor()
 	{
 		titleField = new TextField();
-		titleField.setStyle("-fx-font-size:150%");
+		titleField.setStyle("-fx-font-size:150%; -fx-font-family:\"Iosevka Fixed SS16\"; -fx-font-weight:bold;");
 		titleField.setEditable(false);
 		
 		messageField = new TextArea();
+		messageField.setStyle("-fx-font-family:\"Iosevka Fixed SS16\"; -fx-font-weight:700;");
 		messageField.setEditable(false);
 		
 		setTop(titleField);
