@@ -29,7 +29,7 @@ import javafx.scene.paint.Color;
  */
 public class MainWindow extends FxWindow
 {
-	protected final ObservableList<Entry> items = FXCollections.observableArrayList();
+	protected final ObservableList<Message> items = FXCollections.observableArrayList();
 	protected final TextField searchField;
 	protected final DemoListWithPreviewPane listView;
 	protected final GalleryView galleryView;
@@ -47,9 +47,9 @@ public class MainWindow extends FxWindow
 		
 		items.setAll
 		(
-			new Entry("1", "one"),
-			new Entry("2", "two\ntwo"),
-			new Entry("3", "three\nthree\nthree")
+			new Message("1", "one"),
+			new Message("2", "two\ntwo"),
+			new Message("3", "three\nthree\nthree")
 		);
 		
 		listView = new DemoListWithPreviewPane(items);
@@ -128,7 +128,7 @@ public class MainWindow extends FxWindow
 	
 	protected void addItem()
 	{
-		Entry en = new Entry(String.valueOf(System.currentTimeMillis()), "sample");
+		Message en = new Message(String.valueOf(System.currentTimeMillis()), "sample");
 		items.add(en);
 	}
 }

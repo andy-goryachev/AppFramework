@@ -8,9 +8,9 @@ import javafx.scene.Node;
  * Demo List With Preview Pane.
  */
 public class DemoListWithPreviewPane
-	extends ListWithPreviewPane<Entry>
+	extends ListWithPreviewPane<Message>
 {
-	public DemoListWithPreviewPane(ObservableList<Entry> items)
+	public DemoListWithPreviewPane(ObservableList<Message> items)
 	{
 		super(items);
 
@@ -19,8 +19,8 @@ public class DemoListWithPreviewPane
 	}
 
 	
-	protected Node createPreview(Entry en)
+	protected Node createPreview(Message en)
 	{
-		return new EntryPreviewPane(en);
+		return new MessagePreviewPane(en);
 	}
 }

@@ -7,25 +7,25 @@ import javafx.scene.text.TextFlow;
 
 
 /**
- * Entry Preview Pane.
+ * Message Preview Pane.
  */
-public class EntryPreviewPane
+public class MessagePreviewPane
 	extends BorderPane
 {
-	private final Entry entry;
+	private final Message message;
 	private final Label titleField;
 	private final TextFlow previewField;
 	
 	
-	public EntryPreviewPane(Entry en)
+	public MessagePreviewPane(Message m)
 	{
-		this.entry = en;
+		this.message = m;
 		
 		titleField = new Label();
-		titleField.textProperty().bind(en.title);
+		titleField.textProperty().bind(m.title);
 		
 		Text textField = new Text();
-		textField.textProperty().bind(en.text);
+		textField.textProperty().bind(m.text);
 		
 		previewField = new TextFlow(textField);
 
