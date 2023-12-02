@@ -21,6 +21,18 @@ public class Message
 	}
 	
 	
+	public String getTitle()
+	{
+		return title.get();
+	}
+	
+	
+	public String getText()
+	{
+		return text.get();
+	}
+	
+	
 	public long getTime()
 	{
 		return time;

@@ -1,6 +1,5 @@
 // Copyright © 2023 Andy Goryachev <andy@goryachev.com>
 package goryachev.demo;
-import goryachev.fx.CPane;
 import goryachev.fx.FxObject;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -13,32 +12,29 @@ import javafx.scene.layout.BorderPane;
 
 
 /**
- * List With Preview Pane.
+ * Message List With Preview Pane.
  */
-public abstract class ListWithPreviewPane<T>
-	extends CPane
+public class MessageListWithPreviewPane
+	extends BorderPane
 {
-	protected abstract Node createPreview(T item);
-	
-	//
-	
-	protected final TableView<T> table;
+	protected final TableView<Message> table;
+	protected final MessageEditor editor;
 	protected final BorderPane detail;
 	protected final SplitPane split;
 	
 	
-	public ListWithPreviewPane(ObservableList<T> items)
+	public MessageListWithPreviewPane(ObservableList<Message> items)
 	{
 		table = new TableView<>(items);
 		table.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_SUBSEQUENT_COLUMNS);
-		TableColumn<T,T> c = new TableColumn<>();
+		TableColumn<Message,Message> c = new TableColumn<>();
 		c.setCellFactory((tc) ->
 		{
-			return new TableCell<T,T>()
+			return new TableCell<Message,Message>()
 			{
 				@Override
-				protected void updateItem(T item, boolean empty)
+				protected void updateItem(Message item, boolean empty)
 				{
 					if(item != getItem())
 					{
@@ -55,10 +51,35 @@ public abstract class ListWithPreviewPane<T>
 		});
 		table.getColumns().add(c);
 		
+		editor = new MessageEditor();
+		
 		detail = new BorderPane();
+		detail.setCenter(editor);
 		
 		split = new SplitPane(table, detail);
 		split.setDividerPositions(0.25);
 		setCenter(split);
+		
+		// TODO set cell height on first item or font change
+		table.setFixedCellSize(75);
+		
+		table.getSelectionModel().selectedItemProperty().addListener((x) ->
+		{
+			updateSelection();
+		});
+	}
+	
+	
+	protected Node createPreview(Message en)
+	{
+		return new MessagePreviewPane(en);
+	}
+	
+	
+	protected void updateSelection()
+	{
+		Message m = table.getSelectionModel().getSelectedItem();
+		detail.setCenter(editor);
+		editor.setMessage(m);
 	}
 }

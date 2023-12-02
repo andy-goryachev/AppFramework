@@ -31,7 +31,7 @@ public class MainWindow extends FxWindow
 {
 	protected final ObservableList<Message> items = FXCollections.observableArrayList();
 	protected final TextField searchField;
-	protected final DemoListWithPreviewPane listView;
+	protected final MessageListWithPreviewPane listView;
 	protected final GalleryView galleryView;
 	protected final TableWithPreviewPane tableView;
 	
@@ -52,7 +52,7 @@ public class MainWindow extends FxWindow
 			new Message("3", "three\nthree\nthree")
 		);
 		
-		listView = new DemoListWithPreviewPane(items);
+		listView = new MessageListWithPreviewPane(items);
 		
 		galleryView = new GalleryView();
 		
