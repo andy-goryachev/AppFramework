@@ -32,9 +32,8 @@ public class CssStyle
 		{
 			return true;
 		}
-		else if(x instanceof CssStyle)
+		else if(x instanceof CssStyle z)
 		{
-			CssStyle z = (CssStyle)x;
 			return name.equals(z.name);
 		}
 		else
