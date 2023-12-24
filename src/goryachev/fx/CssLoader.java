@@ -15,17 +15,21 @@ import javafx.application.Platform;
  */
 public class CssLoader
 {
-	protected static final Log log = Log.get("CssLoader");
+	private static final Log log = Log.get("CssLoader");
 	private static String url;
 	private static Supplier<FxStyleSheet> generator;
 	private static CSet<String> styles;
+	/** enables stylesheet auto refresh */
+	public static boolean refresh = Boolean.getBoolean(FxFlags.CSS_REFRESH);
+	/** dumps the stylesheet to stdout */
+	public static boolean dump = Boolean.getBoolean(FxFlags.CSS_DUMP);
 	
 	
 	static
 	{
 		try
 		{
-			if(FxConfig.cssRefreshEnabled())
+			if(refresh)
 			{
 				Thread t = new Thread("reloading css")
 				{
@@ -96,6 +100,10 @@ public class CssLoader
 			if(CKit.notEquals(encoded, url))
 			{
 				log.trace(css);
+				if(dump)
+				{
+					System.out.println(css);
+				}
 				
 				String old = url;
 				url = encoded;

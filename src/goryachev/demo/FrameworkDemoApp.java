@@ -19,6 +19,8 @@ public class FrameworkDemoApp extends Application
 		// init logging
 		Log.initConsoleForDebug();
 		Log.getRoot().info();
+		CssLoader.refresh = true;
+		//CssLoader.dump = true;
 
 		File settings = new File(CPlatform.getSettingsFolder(), "FrameworkDemoApp/settings.conf");
 		GlobalSettings.setFileProvider(settings);
