@@ -7,13 +7,15 @@ import javafx.scene.Node;
 /**
  * CSS Style.
  * 
- * TODO get rid of name, use property to set either
- * - auto-generated S1,... or \`25
- * - name from stack trace .goryachev-fx-CssStyle-L16
- * 
- * property/setting:
- * - auto re-load
- * - dump to stdout/stderr
+ * Usage example:
+ * <pre>
+ * public static final CssStyle EXAMPLE = new CssStyle();
+ * ...
+ * {
+ *     Pane pane = new Pane();
+ *     EXAMPLE.set(pane);
+ * }
+ * <pre>
  */
 public class CssStyle
 {

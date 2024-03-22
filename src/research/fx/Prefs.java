@@ -12,11 +12,6 @@ import javafx.stage.Window;
  * 
  * .local()
  * .prop(String name, Property)
- * 
- * 
- * CssStyle()
- *   css.loader.reload=1
- *   css.loader.dump
  */
 public class Prefs
 {
@@ -27,5 +22,19 @@ public class Prefs
 	
 	public static void name(Node n, String name)
 	{
-	}	
+	}
+	
+	
+	public static String getName(Node n)
+	{
+		// TODO
+		return null;
+	}
+	
+	
+	public static String getName(Window n)
+	{
+		// TODO
+		return null;
+	}
 }
