@@ -1,4 +1,4 @@
-// Copyright © 2023 Andy Goryachev <andy@goryachev.com>
+// Copyright © 2023-2024 Andy Goryachev <andy@goryachev.com>
 package goryachev.demo;
 import goryachev.fx.FxButton;
 import goryachev.fx.FxDump;
@@ -110,7 +110,7 @@ public class MainWindow extends FxWindow
 	private Node createStatusBar()
 	{
 		BorderPane p = new BorderPane();
-		p.setRight(new Label("copyright © 2023 andy goryachev  "));
+		p.setRight(new Label("copyright © 2024 andy goryachev  "));
 		return p;
 	}
 	
