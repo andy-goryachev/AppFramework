@@ -1,24 +1,25 @@
 // Copyright © 2023-2024 Andy Goryachev <andy@goryachev.com>
 package goryachev.demo;
-import goryachev.fx.FxObject;
+import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
-import javafx.scene.Node;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 
 
 /**
  * Message List With Preview Pane.
+ * This implementation is useful when the list view needs more than one column
+ * and must therefore use a TableView.
+ * For a true single-column lists, use MessageListWithPreviewPane.
  */
 public class MessageListWithPreviewPane
 	extends BorderPane
 {
-	protected final TableView<Message> table;
+	protected final ListView<Message> list;
 	protected final MessageEditor editor;
 	protected final BorderPane detail;
 	protected final SplitPane split;
@@ -26,45 +27,45 @@ public class MessageListWithPreviewPane
 	
 	public MessageListWithPreviewPane(ObservableList<Message> items)
 	{
-		table = new TableView<>(items);
-		table.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_SUBSEQUENT_COLUMNS);
-		TableColumn<Message,Message> c = new TableColumn<>();
-		c.setCellFactory((tc) ->
+		list = new ListView<>(items);
+		list.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+		list.setCellFactory((c) ->
 		{
-			return new TableCell<Message,Message>()
+			return new ListCell<Message>()
 			{
 				@Override
 				protected void updateItem(Message item, boolean empty)
 				{
 					if(item != getItem())
 					{
+						Region n;
+						if(item == null)
+						{
+							n = null;
+						}
+						else
+						{
+							n = createPreview(item);
+							n.prefWidthProperty().bind
+							(
+								Bindings.createDoubleBinding
+								(
+									() ->
+									{
+										// magic 2 is probably for snapping
+										return getWidth() - snappedLeftInset() - snappedRightInset() - 2;
+									},
+									widthProperty()
+								)
+							);
+						}
+
 						super.updateItem(item, empty);
 						super.setText(null);
-						super.setGraphic(item == null ? null : createPreview(item));
+						super.setGraphic(n);
 					}
 				}
 			};
-		});
-		c.setCellValueFactory((df) ->
-		{
-			return new FxObject(df.getValue());
-		});
-		table.getColumns().add(c);
-		// permanently hide the table header
-		table.skinProperty().addListener((s, p, v) ->
-		{
-			Pane h = (Pane)table.lookup("TableHeaderRow");
-			if(h != null)
-			{
-				if(h.isVisible())
-				{
-					h.setMaxHeight(0);
-					h.setMinHeight(0);
-					h.setPrefHeight(0);
-					h.setVisible(false);
-				}
-			}
 		});
 		
 		editor = new MessageEditor();
@@ -72,21 +73,22 @@ public class MessageListWithPreviewPane
 		detail = new BorderPane();
 		detail.setCenter(editor);
 		
-		split = new SplitPane(table, detail);
-		split.setDividerPositions(0.25);
+		split = new SplitPane(list, detail);
+		split.setDividerPositions(0.2);
 		setCenter(split);
 		
 		// TODO set cell height on first item or font change
-		table.setFixedCellSize(75);
+		list.setFixedCellSize(75);
 		
-		table.getSelectionModel().selectedItemProperty().addListener((x) ->
+		list.getSelectionModel().selectedItemProperty().addListener((x) ->
 		{
 			updateSelection();
 		});
+		list.getSelectionModel().selectFirst();
 	}
 	
 	
-	protected Node createPreview(Message m)
+	protected Region createPreview(Message m)
 	{
 		return new MessagePreviewPane(m);
 	}
@@ -94,7 +96,7 @@ public class MessageListWithPreviewPane
 	
 	protected void updateSelection()
 	{
-		Message m = table.getSelectionModel().getSelectedItem();
+		Message m = list.getSelectionModel().getSelectedItem();
 		detail.setCenter(editor);
 		editor.setMessage(m);
 	}
@@ -102,6 +104,6 @@ public class MessageListWithPreviewPane
 	
 	public void select(Message m)
 	{
-		table.getSelectionModel().select(m);
+		list.getSelectionModel().select(m);
 	}
 }

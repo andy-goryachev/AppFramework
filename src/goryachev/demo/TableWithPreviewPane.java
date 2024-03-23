@@ -38,10 +38,6 @@ public class TableWithPreviewPane
 		sortedItems.comparatorProperty().bind(table.comparatorProperty());
 		table.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_SUBSEQUENT_COLUMNS);
-		table.getSelectionModel().selectedItemProperty().addListener((s,p,c) ->
-		{
-			handleSelection(c);
-		});
 		
 		{
 			FxTableColumn<Message,Long> c = new FxTableColumn<>("Date");
@@ -97,6 +93,12 @@ public class TableWithPreviewPane
 		split.setOrientation(Orientation.VERTICAL);
 		split.setDividerPositions(0.25);
 		setCenter(split);
+		
+		table.getSelectionModel().selectedItemProperty().addListener((s,p,c) ->
+		{
+			handleSelection(c);
+		});
+		table.getSelectionModel().selectFirst();
 	}
 	
 	
