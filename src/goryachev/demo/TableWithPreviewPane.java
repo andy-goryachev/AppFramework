@@ -24,8 +24,10 @@ public class TableWithPreviewPane
 {
 	protected final SortedList<Message> sortedItems;
 	protected final TableView<Message> table;
+	protected final MessageEditor editor;
 	protected final BorderPane detail;
 	protected final SplitPane split;
+	// TODO typically, application-wide
 	protected static final FxDateFormatter FORMAT = new FxDateFormatter("yyyy/MM/dd HH:mm");
 	
 	
@@ -37,6 +39,10 @@ public class TableWithPreviewPane
 		sortedItems.comparatorProperty().bind(table.comparatorProperty());
 		table.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_SUBSEQUENT_COLUMNS);
+		table.getSelectionModel().selectedItemProperty().addListener((s,p,c) ->
+		{
+			handleSelection(c);
+		});
 		
 		{
 			FxTableColumn<Message,Long> c = new FxTableColumn<>("Date");
@@ -83,7 +89,10 @@ public class TableWithPreviewPane
 			table.getColumns().add(c);
 		}
 		
+		editor = new MessageEditor();
+		
 		detail = new BorderPane();
+		detail.setCenter(editor);
 		
 		split = new SplitPane(table, detail);
 		split.setOrientation(Orientation.VERTICAL);
@@ -106,5 +115,11 @@ public class TableWithPreviewPane
 		}
 		
 		return FORMAT.format(t);
+	}
+	
+	
+	protected void handleSelection(Message m)
+	{
+		editor.setMessage(m);
 	}
 }

@@ -29,6 +29,8 @@ import javafx.scene.paint.Color;
  */
 public class MainWindow extends FxWindow
 {
+	private final int ICON_SIZE = 20;
+
 	protected final ObservableList<Message> items = FXCollections.observableArrayList();
 	protected final TextField searchField;
 	protected final MessageListWithPreviewPane listView;
@@ -61,12 +63,11 @@ public class MainWindow extends FxWindow
 		// TODO .tab-header-area
 		FxTabPane sidePane = new FxTabPane();
 		sidePane.setSide(Side.LEFT);
-		int sz = 20;
-		sidePane.addTab(t(new StarIcon(sz, Color.GRAY), "List With Preview", listView));
-		sidePane.addTab(t(new GalleryIcon(sz - 6, 2, 2), "Gallery View", galleryView));
-		sidePane.addTab(t(new StarIcon(sz, Color.YELLOW), "Table View", tableView));
-		sidePane.addTab(t(new HamburgerIcon(sz), null, null));
-		sidePane.addTab(t(new FindIcon(sz), null, null));
+		sidePane.addTab(t(new StarIcon(ICON_SIZE, Color.GRAY), "List With Preview", listView));
+		sidePane.addTab(t(new StarIcon(ICON_SIZE, Color.YELLOW), "Table View", tableView));
+		sidePane.addTab(t(new GalleryIcon(ICON_SIZE - 6, 2, 2), "Gallery View", galleryView));
+		sidePane.addTab(t(new HamburgerIcon(ICON_SIZE), "TBD", null));
+		sidePane.addTab(t(new FindIcon(ICON_SIZE), "TBD", null));
 		
 		VBox vb = new VBox
 		(
