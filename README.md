@@ -1,6 +1,14 @@
 # Application Framework
 
-Provides common base for JavaFX applications.
+Provides a convenient base for JavaFX applications:
+
+- window locations
+- remembers user settings
+- demonstrates basic common UI paradigms (list/table with attached detail view, etc.)
+- common icons generator
+- runtime stylesheet generator
+
+![screenshot](doc/screenshot.png)
 
 
 
