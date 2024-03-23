@@ -203,6 +203,7 @@ public class FxSchema
 		int sz = cs.size();
 		ObservableList<TableColumn<?,?>> sorted = t.getSortOrder();
 		
+		// FIX hash of column name instead of id!
 		// columns: count,[id,width,sortOrder(0 for none, negative for descending, positive for ascending)
 		SStream s = new SStream();
 		s.add(sz);

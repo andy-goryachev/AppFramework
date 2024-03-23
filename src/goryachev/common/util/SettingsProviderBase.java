@@ -74,7 +74,7 @@ public abstract class SettingsProviderBase
 		if(x instanceof String[] ss)
 		{
 			rv = ss;
-			log.debug(() -> key + " " + List.of(rv));
+			log.debug(() -> key + " " + new CList<>(rv));
 		}
 		else if(x instanceof String s)
 		{
@@ -121,7 +121,7 @@ public abstract class SettingsProviderBase
 	public synchronized void setStream(String key, SStream s)
 	{
 		String[] ss = s.toArray();
-		logWrites.debug(() -> key + " " + (ss == null ? "<null>" : List.of(ss)));
+		logWrites.debug(() -> key + " " + (ss == null ? "<null>" : new CList<>(ss)));
 		data.put(key, ss);
 	}
 	
