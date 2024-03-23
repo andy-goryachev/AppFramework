@@ -17,7 +17,9 @@ public abstract class SettingsProviderBase
 	
 	// stores String or String[]
 	protected CMap<String,Object> data = new CMap<>();
-	protected static final Log log = Log.get("SettingsProviderBase");
+	private static final Log log = Log.get("SettingsProviderBase");
+	private static final Log logReads = Log.get("SettingsProviderBase.reads");
+	private static final Log logWrites = Log.get("SettingsProviderBase.writes");
 
 	
 	public SettingsProviderBase()
@@ -52,34 +54,45 @@ public abstract class SettingsProviderBase
 	protected String getStringPrivate(String key)
 	{
 		Object x = getValue(key);
-		if(x instanceof String)
+		if(x instanceof String s)
 		{
-			return (String)x;
+			logReads.debug(key, s);
+			return s;
 		}
-		return null;
+		else
+		{
+			logReads.debug(key, "<null>");
+			return null;
+		}
 	}
 	
 	
 	protected String[] getArrayPrivate(String key)
 	{
 		Object x = getValue(key);
-		if(x instanceof String[])
+		String[] rv;
+		if(x instanceof String[] ss)
 		{
-			return (String[])x;
+			rv = ss;
+			log.debug(() -> key + " " + List.of(rv));
 		}
-		else if(x instanceof String)
+		else if(x instanceof String s)
 		{
-			return new String[] { (String)x };
+			rv = new String[] { s };
+			log.debug(() -> key + " [" + s + "]");
 		}
-		return null;
+		else
+		{
+			rv = null;
+			log.debug(() -> key + " <null>");
+		}
+		return rv;
 	}
 	
 	
 	public String getString(String key)
 	{
-		String v = getStringPrivate(key);
-		//log.debug(key, v);
-		return v;
+		return getStringPrivate(key);
 	}
 
 
@@ -88,11 +101,12 @@ public abstract class SettingsProviderBase
 		if(val == null)
 		{
 			data.remove(key);
+			logWrites.debug(key, "<null>");
 		}
 		else
 		{
 			data.put(key, val);
-			//log.debug(key, val);
+			logWrites.debug(key, val);
 		}
 	}
 
@@ -106,7 +120,9 @@ public abstract class SettingsProviderBase
 
 	public synchronized void setStream(String key, SStream s)
 	{
-		data.put(key, s.toArray());
+		String[] ss = s.toArray();
+		logWrites.debug(() -> key + " " + (ss == null ? "<null>" : List.of(ss)));
+		data.put(key, ss);
 	}
 	
 	
