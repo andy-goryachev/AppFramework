@@ -1,6 +1,5 @@
 // Copyright © 2023-2024 Andy Goryachev <andy@goryachev.com>
 package goryachev.demo;
-import goryachev.common.util.TextTools;
 import goryachev.fx.CPane;
 import goryachev.fx.FxDateFormatter;
 import goryachev.fx.FxObject;
@@ -27,7 +26,7 @@ public class TableWithPreviewPane
 	protected final MessageEditor editor;
 	protected final BorderPane detail;
 	protected final SplitPane split;
-	// TODO typically, application-wide
+	// TODO typically, application-wide option
 	protected static final FxDateFormatter FORMAT = new FxDateFormatter("yyyy/MM/dd HH:mm");
 	
 	
@@ -83,7 +82,7 @@ public class TableWithPreviewPane
 			c.setCellValueFactory((en) ->
 			{
 				String s = en.getValue().textProperty().getValue();
-				s = filterNewlines(s);
+				s = AppTools.contractWhitespace(s);
 				return new FxString(s);
 			});
 			table.getColumns().add(c);
@@ -98,12 +97,6 @@ public class TableWithPreviewPane
 		split.setOrientation(Orientation.VERTICAL);
 		split.setDividerPositions(0.25);
 		setCenter(split);
-	}
-	
-	
-	protected static String filterNewlines(String s)
-	{
-		return TextTools.replace(s, '\n', ' ');
 	}
 	
 	

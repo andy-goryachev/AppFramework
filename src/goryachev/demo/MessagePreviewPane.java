@@ -1,5 +1,7 @@
 // Copyright © 2023-2024 Andy Goryachev <andy@goryachev.com>
 package goryachev.demo;
+import javafx.beans.binding.Bindings;
+import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
@@ -23,13 +25,23 @@ public class MessagePreviewPane
 		
 		titleField = new Label();
 		titleField.textProperty().bind(m.titleProperty());
+		titleField.setStyle("-fx-font-weight:bold;");
 		
-		Text textField = new Text();
-		textField.textProperty().bind(m.textProperty());
+		Text t = new Text();
+		t.wrappingWidthProperty().bind(widthProperty());
+		t.textProperty().bind
+		(
+			Bindings.createStringBinding
+			(
+				() -> AppTools.contractWhitespace(m.getText()),
+				m.textProperty()
+			)
+		);
 		
-		previewField = new TextFlow(textField);
+		previewField = new TextFlow(t);
 
 		setTop(titleField);
 		setCenter(previewField);
+		setPadding(new Insets(2, 4, 2, 4));
 	}
 }

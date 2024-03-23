@@ -24,6 +24,12 @@ public class Styles
 		(
 			new CommonStyles(),
 			
+			// bold still does not work, think different: https://bugs.openjdk.java.net/browse/JDK-8176835
+			selector(".root").defines
+			(
+				prop("-fx-font-family", "\"Iosevka Fixed SS16\"")
+			),
+			
 //			selector(MainWindow.INFO_PANE).defines
 //			(
 //				prop("-fx-background-color", "linear-gradient(to bottom, " + CssTools.toColor(buttonPanel) + ", " + CssTools.toColor(bottomInfo) + ")")

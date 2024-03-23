@@ -9,6 +9,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 
 
 /**
@@ -50,6 +51,21 @@ public class MessageListWithPreviewPane
 			return new FxObject(df.getValue());
 		});
 		table.getColumns().add(c);
+		// permanently hide the table header
+		table.skinProperty().addListener((s, p, v) ->
+		{
+			Pane h = (Pane)table.lookup("TableHeaderRow");
+			if(h != null)
+			{
+				if(h.isVisible())
+				{
+					h.setMaxHeight(0);
+					h.setMinHeight(0);
+					h.setPrefHeight(0);
+					h.setVisible(false);
+				}
+			}
+		});
 		
 		editor = new MessageEditor();
 		

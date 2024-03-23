@@ -23,7 +23,7 @@ public class MessageEditor
 		//titleField.setEditable(false);
 		
 		messageField = new TextArea();
-		messageField.setStyle("-fx-font-family:\"Iosevka Fixed SS16\"; -fx-font-weight:700;");
+		messageField.setStyle("-fx-font-family:\"Iosevka Fixed SS16\";");
 		//messageField.setEditable(false);
 		
 		setTop(titleField);
