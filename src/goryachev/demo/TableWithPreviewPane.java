@@ -67,7 +67,7 @@ public class TableWithPreviewPane
 			c.setPrefWidth(150);
 			c.setCellValueFactory((en) ->
 			{
-				return en.getValue().title;
+				return en.getValue().titleProperty();
 			});
 			table.getColumns().add(c);
 		}
@@ -76,7 +76,7 @@ public class TableWithPreviewPane
 			c.setPrefWidth(150);
 			c.setCellValueFactory((en) ->
 			{
-				String s = en.getValue().text.getValue();
+				String s = en.getValue().textProperty().getValue();
 				s = filterNewlines(s);
 				return new FxString(s);
 			});

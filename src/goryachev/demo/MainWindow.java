@@ -86,6 +86,7 @@ public class MainWindow extends FxWindow
 	{
 		FxMenuBar m = new FxMenuBar();
 		m.menu("File");
+		m.item("Add Note", this::addItem);
 		m.menu("Edit");
 		m.menu("Window");
 		m.menu("Help");
@@ -96,7 +97,7 @@ public class MainWindow extends FxWindow
 	private FxToolBar createToolBar()
 	{
 		FxToolBar t = new FxToolBar();
-		t.add(new FxButton("#1", this::addItem));
+		t.add(new FxButton("+Note", "Add a note", this::addItem));
 		t.add(new Button("#2"));
 		t.add(new Button("#3"));
 		t.add(new Button("#4"));
@@ -110,7 +111,7 @@ public class MainWindow extends FxWindow
 	private Node createStatusBar()
 	{
 		BorderPane p = new BorderPane();
-		p.setRight(new Label("copyright © 2024 andy goryachev  "));
+		p.setRight(new Label("     " + Version.COPYRIGHT + "     "));
 		return p;
 	}
 	
@@ -129,6 +130,7 @@ public class MainWindow extends FxWindow
 	protected void addItem()
 	{
 		Message en = new Message(String.valueOf(System.currentTimeMillis()), "sample");
-		items.add(en);
+		items.add(0, en);
+		listView.select(en);
 	}
 }

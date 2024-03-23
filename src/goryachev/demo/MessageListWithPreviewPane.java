@@ -70,9 +70,9 @@ public class MessageListWithPreviewPane
 	}
 	
 	
-	protected Node createPreview(Message en)
+	protected Node createPreview(Message m)
 	{
-		return new MessagePreviewPane(en);
+		return new MessagePreviewPane(m);
 	}
 	
 	
@@ -81,5 +81,11 @@ public class MessageListWithPreviewPane
 		Message m = table.getSelectionModel().getSelectedItem();
 		detail.setCenter(editor);
 		editor.setMessage(m);
+	}
+
+	
+	public void select(Message m)
+	{
+		table.getSelectionModel().select(m);
 	}
 }

@@ -13,17 +13,18 @@ public class MessageEditor
 {
 	protected final TextField titleField;
 	protected final TextArea messageField;
+	private Message msg;
 	
 	
 	public MessageEditor()
 	{
 		titleField = new TextField();
 		titleField.setStyle("-fx-font-size:150%; -fx-font-family:\"Iosevka Fixed SS16\"; -fx-font-weight:bold;");
-		titleField.setEditable(false);
+		//titleField.setEditable(false);
 		
 		messageField = new TextArea();
 		messageField.setStyle("-fx-font-family:\"Iosevka Fixed SS16\"; -fx-font-weight:700;");
-		messageField.setEditable(false);
+		//messageField.setEditable(false);
 		
 		setTop(titleField);
 		setCenter(messageField);
@@ -32,6 +33,14 @@ public class MessageEditor
 	
 	public void setMessage(Message m)
 	{
+		if(msg != null)
+		{
+			titleField.textProperty().unbindBidirectional(msg.titleProperty());
+			messageField.textProperty().unbindBidirectional(msg.textProperty());
+		}
+
+		msg = m;
+
 		if(m == null)
 		{
 			titleField.setText(null);
@@ -39,8 +48,8 @@ public class MessageEditor
 		}
 		else 
 		{
-			titleField.setText(m.getTitle());
-			messageField.setText(m.getText());
+			titleField.textProperty().bindBidirectional(m.titleProperty());
+			messageField.textProperty().bindBidirectional(m.textProperty());
 		}
 	}
 }

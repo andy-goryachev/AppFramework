@@ -48,6 +48,21 @@ public class FxButton
 	{
 		this(text, new FxAction(action));
 	}
+
+	
+	public FxButton(String text, String tooltip, FxAction a)
+	{
+		super(text);
+		a.attach(this);
+		FX.setTooltip(this, tooltip);
+	}
+	
+	
+	public FxButton(String text, String tooltip, Runnable action)
+	{
+		this(text, new FxAction(action));
+		FX.setTooltip(this, tooltip);
+	}
 	
 	
 	public FxButton(Node icon, Runnable action)

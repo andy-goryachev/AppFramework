@@ -22,10 +22,10 @@ public class MessagePreviewPane
 		this.message = m;
 		
 		titleField = new Label();
-		titleField.textProperty().bind(m.title);
+		titleField.textProperty().bind(m.titleProperty());
 		
 		Text textField = new Text();
-		textField.textProperty().bind(m.text);
+		textField.textProperty().bind(m.textProperty());
 		
 		previewField = new TextFlow(textField);
 

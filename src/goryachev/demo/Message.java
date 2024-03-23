@@ -9,8 +9,8 @@ import goryachev.fx.FxString;
 public class Message
 {
 	private final long time;
-	public final FxString title = new FxString();
-	public final FxString text = new FxString();
+	private final FxString title = new FxString();
+	private final FxString text = new FxString();
 	
 	
 	public Message(String title, String text)
@@ -18,6 +18,18 @@ public class Message
 		this.time = System.currentTimeMillis();
 		this.title.set(title);
 		this.text.set(text);
+	}
+	
+	
+	public FxString titleProperty()
+	{
+		return title;
+	}
+	
+	
+	public FxString textProperty()
+	{
+		return text;
 	}
 	
 	
