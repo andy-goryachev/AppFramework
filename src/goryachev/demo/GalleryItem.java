@@ -1,15 +1,21 @@
 // Copyright © 2023-2024 Andy Goryachev <andy@goryachev.com>
 package goryachev.demo;
-import goryachev.fx.FxString;
+import javafx.scene.image.Image;
 
 
 /**
  * Gallery Item.
  */
-public class GalleryItem
+public interface GalleryItem
 {
-	public FxString name = new FxString();
-	
-	
-	// TODO slide Image
+	/**
+	 * Returns scaled image.  The image will not exceed the specified dimensions.
+	 */
+	public Image getImage(double width, double height);
+
+
+	/**
+	 * Returns the original full size image as byte array.
+	 */
+	public byte[] getOriginal();
 }

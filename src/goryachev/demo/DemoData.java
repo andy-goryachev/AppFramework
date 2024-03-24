@@ -1,7 +1,13 @@
 // Copyright © 2024 Andy Goryachev <andy@goryachev.com>
 package goryachev.demo;
+import goryachev.common.util.MurmurHash3;
+import java.util.Random;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 
 
 /**
@@ -10,6 +16,7 @@ import javafx.collections.ObservableList;
 public class DemoData
 {
 	private static ObservableList<Message> messages;
+	private static Gallery gallery;
 	
 	
 	public static ObservableList<Message> getMessages()
@@ -259,5 +266,83 @@ public class DemoData
 			);
 		}
 		return messages;
+	}
+
+	
+	public static Gallery getGallery()
+	{
+		if(gallery == null)
+		{
+			gallery = createGallery();
+		}
+		return gallery;
+	}
+
+
+	private static Gallery createGallery()
+	{
+		Gallery g = new Gallery();
+		for(int i=0; i<20; i++)
+		{
+			g.getFolders().add(mkFolder(i));
+		}
+		return g;
+	}
+
+
+	private static GalleryFolder mkFolder(int seq)
+	{
+		GalleryFolder f = new GalleryFolder("Folder " + seq);
+		Random r = new Random();
+		int num = 1 + r.nextInt(3);
+		int max;
+		switch(num)
+		{
+		case 1:
+			max = 10;
+			break;
+		case 2:
+			max = 100;
+			break;
+		case 3:
+		default:
+			max = 1000;
+			break;
+		}
+		int sz = r.nextInt(max);
+		
+		for(int i=0; i<sz; i++)
+		{
+			f.getItems().add(mkItem(seq, i));
+		}
+		return f;
+	}
+
+
+	private static GalleryItem mkItem(int seq, int num)
+	{
+		int c = MurmurHash3.hash(seq + "." + num, 0);
+		int r = (c >> 16) & 0xff;
+		int g = (c >> 8) & 0xff;
+		int b = c & 0xff;
+		Color col = Color.rgb(r, g, b);
+		
+		return new GalleryItem()
+		{
+			public byte[] getOriginal()
+			{
+				return null;
+			}
+			
+			
+			public Image getImage(double width, double height)
+			{
+				Canvas c = new Canvas(width, height);
+				GraphicsContext g = c.getGraphicsContext2D();
+				g.setFill(col);
+				g.fillRect(0, 0, width, height);
+				return c.snapshot(null, null);
+			}
+		};
 	}
 }
