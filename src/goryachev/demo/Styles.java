@@ -27,7 +27,19 @@ public class Styles
 			// bold still does not work, think different: https://bugs.openjdk.java.net/browse/JDK-8176835
 			selector(".root").defines
 			(
-				prop("-fx-font-family", "\"Iosevka Fixed SS16\"")
+//				prop("-fx-font-family", "\"Iosevka Fixed SS16\""),
+//				prop("-fx-font-weight", "normal"),
+//				prop("-fx-font-size", "12px")
+			),
+			selector(MessageEditor.TITLE).defines
+			(
+//				fontFamily("\"Iosevka Fixed SS16\""),
+				fontWeight("bold")
+			),
+			selector(MessageEditor.EDITOR).defines
+			(
+//				fontFamily("\"Iosevka Fixed SS16\""),
+//				fontWeight("500")
 			),
 			
 //			selector(MainWindow.INFO_PANE).defines

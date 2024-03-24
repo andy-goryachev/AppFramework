@@ -37,7 +37,7 @@ public class CssStyle
 	
 	private static synchronized String generateName(String name)
 	{
-		if(CssLoader.dump)
+		if(CssLoader.DUMP)
 		{
 			StackTraceElement s = new Throwable().getStackTrace()[2];
 			return s.getClassName() + "-" + s.getLineNumber() + (name == null ? "" : "-" + name);

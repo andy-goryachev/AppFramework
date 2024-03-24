@@ -19,8 +19,6 @@ public class FrameworkDemoApp extends Application
 		// init logging
 		Log.initConsoleForDebug();
 		Log.getRoot().info();
-		CssLoader.refresh = true;
-		//CssLoader.dump = true;
 
 		Application.launch(FrameworkDemoApp.class, args);
 	}

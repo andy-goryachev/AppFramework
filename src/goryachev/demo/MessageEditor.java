@@ -1,5 +1,6 @@
 // Copyright © 2023-2024 Andy Goryachev <andy@goryachev.com>
 package goryachev.demo;
+import goryachev.fx.CssStyle;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
@@ -11,6 +12,8 @@ import javafx.scene.layout.BorderPane;
 public class MessageEditor
 	extends BorderPane
 {
+	public final static CssStyle TITLE = new CssStyle();
+	public final static CssStyle EDITOR = new CssStyle();
 	protected final TextField titleField;
 	protected final TextArea messageField;
 	private Message msg;
@@ -19,11 +22,12 @@ public class MessageEditor
 	public MessageEditor()
 	{
 		titleField = new TextField();
-		titleField.setStyle("-fx-font-size:150%; -fx-font-family:\"Iosevka Fixed SS16\"; -fx-font-weight:bold;");
+		titleField.setStyle("-fx-font-size:150%; -fx-font-weight:bold;");
+		TITLE.set(titleField);
 		
 		messageField = new TextArea();
-		messageField.setStyle("-fx-font-family:\"Iosevka Fixed SS16\";");
 		messageField.setWrapText(true);
+		EDITOR.set(messageField);
 		
 		setTop(titleField);
 		setCenter(messageField);
