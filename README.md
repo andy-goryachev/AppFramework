@@ -1,12 +1,15 @@
 # Application Framework
 
-Provides a convenient base for JavaFX applications:
+Provides a convenient base for JavaFX applications.
 
-- window locations
-- remembers user settings
+## Features
+
+- remembers locations of windows and user selection
 - demonstrates basic common UI paradigms (list/table with attached detail view, etc.)
-- common icons generator
+- provides a common icons generator
 - runtime stylesheet generator
+
+This is pretty much work in progress, so don't even think of using it in production.  The APIs will definitely change.
 
 ![screenshot](doc/screenshot.png)
 
