@@ -3,6 +3,7 @@ package goryachev.fx.internal;
 import goryachev.common.util.GlobalSettings;
 import goryachev.common.util.SB;
 import goryachev.common.util.SStream;
+import goryachev.fx.CPane;
 import goryachev.fx.FX;
 import goryachev.fx.FxDialog;
 import goryachev.fx.FxSettings;
@@ -15,6 +16,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Control;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuBar;
@@ -36,6 +38,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Shape;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Modality;
 import javafx.stage.PopupWindow;
 import javafx.stage.Stage;
@@ -376,7 +379,6 @@ public class FxSchema
 	}
 
 
-	// FIX rename
 	private static String computeName(Node n)
 	{
 		WinMonitor m = WinMonitor.forNode(n);
@@ -385,51 +387,48 @@ public class FxSchema
 			SB sb = new SB();
 			if(collectNames(sb, n))
 			{
-				return null;
+				String id = m.getID();
+				return id + sb;
 			}
-
-			String id = m.getID();
-			return id + sb;
 		}
 		return null;
 	}
 
 
-	// returns true if Node should be ignored
-	// FIX reverse logic, rename
+	// returns false if Node should be ignored
 	private static boolean collectNames(SB sb, Node n)
 	{
 		if(n instanceof MenuBar)
 		{
-			return true;
+			return false;
 		}
 		else if(n instanceof Shape)
 		{
-			return true;
+			return false;
 		}
 		else if(n instanceof ImageView)
 		{
-			return true;
+			return false;
 		}
 
 		Parent p = n.getParent();
 		if(p != null)
 		{
-			if(collectNames(sb, p))
+			if(!collectNames(sb, p))
 			{
-				return true;
+				return false;
 			}
 		}
 
 		String name = getNodeName(n);
 		if(name == null)
 		{
-			return true;
+			return false;
 		}
 
 		sb.append('.');
 		sb.append(name);
-		return false;
+		return true;
 	}
 
 
@@ -453,6 +452,10 @@ public class FxSchema
 				{
 					return "BorderPane";
 				}
+				else if(n instanceof CPane)
+				{
+					return "CPane";
+				}
 				else if(n instanceof DialogPane)
 				{
 					return "DialogPane";
@@ -473,6 +476,10 @@ public class FxSchema
 				{
 					return "StackPane";
 				}
+				else if(n instanceof TextFlow)
+				{
+					return null;
+				}
 				else if(n instanceof TilePane)
 				{
 					return "TilePane";
@@ -485,6 +492,10 @@ public class FxSchema
 				{
 					return "Pane";
 				}
+			}
+			else if(n instanceof Control)
+			{
+				return n.getClass().getSimpleName();
 			}
 			else if(n instanceof Group)
 			{
@@ -766,13 +777,10 @@ public class FxSchema
 		int ix = GlobalSettings.getInt(FX_PREFIX + name + SFX_SELECTION, -1);
 		if(ix >= 0)
 		{
-			FX.later(() ->
+			if(ix < p.getTabs().size())
 			{
-				if(ix < p.getTabs().size())
-				{
-					p.getSelectionModel().select(ix);
-				}
-			});
+				p.getSelectionModel().select(ix);
+			}
 		}
 	}
 }

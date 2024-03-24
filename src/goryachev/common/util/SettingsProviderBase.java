@@ -56,12 +56,12 @@ public abstract class SettingsProviderBase
 		Object x = getValue(key);
 		if(x instanceof String s)
 		{
-			logReads.debug(key, s);
+			logReads.debug(Dump.spaces(key, s));
 			return s;
 		}
 		else
 		{
-			logReads.debug(key, "<null>");
+			logReads.debug(Dump.spaces(key, "<null>"));
 			return null;
 		}
 	}
@@ -101,12 +101,12 @@ public abstract class SettingsProviderBase
 		if(val == null)
 		{
 			data.remove(key);
-			logWrites.debug(key, "<null>");
+			logWrites.debug(Dump.spaces(key, "<null>"));
 		}
 		else
 		{
 			data.put(key, val);
-			logWrites.debug(key, val);
+			logWrites.debug(Dump.spaces(key, val));
 		}
 	}
 
