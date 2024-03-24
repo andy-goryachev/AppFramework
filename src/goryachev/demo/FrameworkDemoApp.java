@@ -27,15 +27,16 @@ public class FrameworkDemoApp extends Application
 	public void init()
 	{
 		File settings = new File(CPlatform.getSettingsFolder(), "FrameworkDemoApp/settings.conf");
-//		GlobalSettings.setFileProvider(settings);
 		FxSettings.initFileProvider(settings);		
 	}
 
 
 	public void start(Stage s) throws Exception
 	{
+		// generate stylesheet
 		CssLoader.setStyles(Styles::new);
 
+		// create/load data and open the main window
 		var messages = DemoData.getMessages();
 		MainWindow w = new MainWindow(messages);
 		w.open();

@@ -25,7 +25,7 @@ import javafx.scene.paint.Color;
 
 
 /**
- * Main demo window.
+ * Demo application main window.
  */
 public class MainWindow extends FxWindow
 {
@@ -59,7 +59,7 @@ public class MainWindow extends FxWindow
 		
 		tableView = new TableWithPreviewPane(items);
 		
-		// TODO .tab-header-area
+		// TODO .tab-header-area style
 		FxTabPane sidePane = new FxTabPane();
 		sidePane.setSide(Side.LEFT);
 		sidePane.addTab(t(new StarIcon(ICON_SIZE, Color.GRAY), "List With Preview", listView));
