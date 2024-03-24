@@ -50,23 +50,24 @@ import javafx.stage.Window;
  */
 public class FxSchema
 {
-	public static final String FX_PREFIX = "FX.";
+	private static final String FX_PREFIX = "FX.";
 	
-	public static final String WINDOWS = FX_PREFIX + ".WINDOWS";
+	static final String WINDOWS = FX_PREFIX + ".WINDOWS";
 	
-	public static final String SFX_COLUMNS = ".COLS";
-	public static final String SFX_DIVIDERS = ".DIVS";
-	public static final String SFX_SELECTION = ".SEL";
-	public static final String SFX_SETTINGS = ".SETTINGS";
+	private static final String SFX_COLUMNS = ".COLS";
+	private static final String SFX_DIVIDERS = ".DIVS";
+	private static final String SFX_EXPANDED = ".EXP";
+	private static final String SFX_SELECTION = ".SEL";
+	private static final String SFX_SETTINGS = ".SETTINGS";
 	
-	public static final String SORT_ASCENDING = "A";
-	public static final String SORT_DESCENDING = "D";
-	public static final String SORT_NONE = "N";
+	private static final String SORT_ASCENDING = "A";
+	private static final String SORT_DESCENDING = "D";
+	private static final String SORT_NONE = "N";
 	
-	public static final String WINDOW_FULLSCREEN = "F";
-	public static final String WINDOW_MAXIMIZED = "X";
-	public static final String WINDOW_ICONIFIED = "I";
-	public static final String WINDOW_NORMAL = "N";
+	private static final String WINDOW_FULLSCREEN = "F";
+	private static final String WINDOW_MAXIMIZED = "X";
+	private static final String WINDOW_ICONIFIED = "I";
+	private static final String WINDOW_NORMAL = "N";
 	
 	private static final Object PROP_LOAD_HANDLER = new Object();
 	private static final Object PROP_SKIP_SETTINGS = new Object();
@@ -221,9 +222,6 @@ public class FxSchema
 			s.saveValues(k);
 		}
 
-		// TODO first: actual nodes
-		// TODO second: nodes with single content node (ex.: TitledPane)
-		// TODO third: nodes with multiple items (ex.: TabPane)
 		if(n instanceof CheckBox cb)
 		{
 			storeCheckBox(cb, name);
@@ -246,7 +244,7 @@ public class FxSchema
 		}
 		else if(n instanceof TitledPane tp)
 		{
-			storeNode(tp.getContent());
+			storeTitledPane(tp, name);
 		}
 		else if(n instanceof TableView t)
 		{
@@ -294,9 +292,6 @@ public class FxSchema
 			s.loadValues(k);
 		}
 
-		// TODO first: actual nodes
-		// TODO second: nodes with single content node (ex.: TitledPane)
-		// TODO third: nodes with multiple items (ex.: TabPane)
 		if(n instanceof CheckBox cb)
 		{
 			restoreCheckBox(cb, name);
@@ -319,7 +314,7 @@ public class FxSchema
 		}
 		else if(n instanceof TitledPane tp)
 		{
-			restoreNode(tp.getContent());
+			restoreTitledPane(tp, name);
 		}
 		else if(n instanceof TableView t)
 		{
@@ -349,7 +344,6 @@ public class FxSchema
 	}
 	
 
-	// TODO reverse the logic?
 	private static boolean handleNullScene(Node node)
 	{
 		if(node == null)
@@ -615,35 +609,18 @@ public class FxSchema
 		SStream ss = new SStream();
 		ss.add(div.length);
 		ss.addAll(div);
-		GlobalSettings.setStream(FX_PREFIX + name, ss);
+		GlobalSettings.setStream(FX_PREFIX + name + SFX_DIVIDERS, ss);
 
 		for(Node ch: sp.getItems())
 		{
 			storeNode(ch);
 		}
 	}
-
-	
-//	TODO
-//	private static void storeSplitPane(String prefix, SplitPane sp)
-//	{
-//		SStream s = new SStream();
-//		s.add(sp.getDividers().size());
-//		s.addAll(sp.getDividerPositions());
-//		
-//		String k = prefix + SFX_DIVIDERS;
-//		GlobalSettings.setStream(k, s);
-//	}
 	
 
 	private static void restoreSplitPane(SplitPane sp, String name)
 	{
-		for(Node ch: sp.getItems())
-		{
-			restoreNode(ch);
-		}
-
-		SStream ss = GlobalSettings.getStream(FX_PREFIX + name);
+		SStream ss = GlobalSettings.getStream(FX_PREFIX + name + SFX_DIVIDERS);
 		if(ss != null)
 		{
 			int sz = ss.nextInt(-1);
@@ -659,33 +636,21 @@ public class FxSchema
 					}
 					divs[i] = v;
 				}
-				// FIX does not work
-				// sp.setDividerPositions(divs);
+				// FIX must run later because of FX split pane inability to set divider positions exactly
+				// it's likely a bug in SplitPane
+				sp.setDividerPositions(divs);
+				FX.later(() ->
+				{
+					sp.setDividerPositions(divs);
+				});
 			}
 		}
+
+		for(Node ch: sp.getItems())
+		{
+			restoreNode(ch);
+		}
 	}
-	
-	
-//	TODO
-//	private static void restoreSplitPane(String prefix, SplitPane sp)
-//	{
-//		String k = prefix + SFX_DIVIDERS;
-//		SStream s = GlobalSettings.getStream(k);
-//		
-//		// must run later because of FX split pane inability to set divider positions exactly
-//		FX.later(() ->
-//		{
-//			int ct = s.nextInt();
-//			if(sp.getDividers().size() == ct)
-//			{
-//				for(int i=0; i<ct; i++)
-//				{
-//					double div = s.nextDouble();
-//					sp.setDividerPosition(i, div);
-//				}
-//			}
-//		});
-//	}
 	
 	
 	private static void storeTableView(TableView t, String name)
@@ -761,16 +726,27 @@ public class FxSchema
 			// TODO
 		}
 	}
-	
-	
+
+
 	private static void storeTabPane(TabPane p, String name)
 	{
 		// selection
 		int ix = p.getSelectionModel().getSelectedIndex();
 		GlobalSettings.setInt(FX_PREFIX + name + SFX_SELECTION, ix);
+
+		// content
+		var sm = p.getSelectionModel();
+		if(sm != null)
+		{
+			var item = sm.getSelectedItem();
+			if(item != null)
+			{
+				storeNode(item.getContent());
+			}
+		}
 	}
-	
-	
+
+
 	private static void restoreTabPane(TabPane p, String name)
 	{
 		// selection
@@ -782,5 +758,33 @@ public class FxSchema
 				p.getSelectionModel().select(ix);
 			}
 		}
+
+		// content
+		var sm = p.getSelectionModel();
+		if(sm != null)
+		{
+			var item = sm.getSelectedItem();
+			if(item != null)
+			{
+				restoreNode(item.getContent());
+			}
+		}
+	}
+	
+	
+	private static void storeTitledPane(TitledPane p, String name)
+	{
+		GlobalSettings.setBoolean(FX_PREFIX + name + SFX_EXPANDED, p.isExpanded());
+		
+		storeNode(p.getContent());
+	}
+	
+	
+	private static void restoreTitledPane(TitledPane p, String name)
+	{
+		boolean expanded = GlobalSettings.getBoolean(FX_PREFIX + name + SFX_EXPANDED, true);
+		p.setExpanded(expanded);		
+
+		restoreNode(p.getContent());
 	}
 }

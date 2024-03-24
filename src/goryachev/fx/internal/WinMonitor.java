@@ -15,7 +15,6 @@ import javafx.stage.Window;
  */
 public class WinMonitor
 {
-	// TODO focused component property
 	private final Window window;
 	private final String id;
 	private double x;
@@ -122,8 +121,8 @@ public class WinMonitor
 
 	private static String createID(Window win)
 	{
-		String prefix = FxSettings.getName(win);
-		if(prefix != null)
+		String name = FxSettings.getName(win);
+		if(name != null)
 		{
 			CSet<String> ids = new CSet<>();
 			for(Window w: Window.getWindows())
@@ -136,7 +135,7 @@ public class WinMonitor
 						return null;
 					}
 					String id = m.getID();
-					if(id.startsWith(prefix))
+					if(id.startsWith(name))
 					{
 						ids.add(id);
 					}
@@ -145,7 +144,7 @@ public class WinMonitor
 
 			for(int i=0; i<200_000; i++)
 			{
-				String id = prefix + i;
+				String id = name + "_" + i;
 				if(!ids.contains(id))
 				{
 					return id;

@@ -72,6 +72,13 @@ public class GlobalSettings
 		}
 		return null;
 	}
+	
+	
+	public static boolean getBoolean(String key, boolean defaultValue)
+	{
+		Boolean b = getBoolean(key);
+		return b == null ? defaultValue : b;
+	}
 
 
 	public static String getString(String key)
