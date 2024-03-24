@@ -404,6 +404,4 @@ public class WindowMgr
 	{
 		return lastFocusOwner.getReadOnlyProperty();
 	}
-
-
 }

@@ -28,7 +28,6 @@ public class FxWindow
 	
 	//
 	
-	public final FxAction closeWindowAction = new FxAction(this::closeWithConfirmation);
 	protected final BorderPane pane;
 	
 	
@@ -46,6 +45,13 @@ public class FxWindow
 	{
 		show();
 	}
+	
+	
+	public final FxAction closeWindowAction()
+	{
+		return new FxAction(this::closeWithConfirmation);
+	}
+
 	
 	
 	public void setTop(Node n)
