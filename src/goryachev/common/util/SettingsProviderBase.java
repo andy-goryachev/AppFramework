@@ -9,9 +9,9 @@ import java.util.List;
  * In-memory map-based Settings Provider.
  */
 public abstract class SettingsProviderBase
-    implements GlobalSettings.Provider
+    implements GlobalSettingsProvider
 {
-	public abstract void save();
+	protected abstract void saveSettings();
 
 	//
 	
@@ -313,5 +313,12 @@ public abstract class SettingsProviderBase
 	{
 		sb.a('\\');
 		sb.a(Hex.toHexByte(c));
+	}
+	
+	
+	public final void save()
+	{
+		saveSettings();
+		log.debug();
 	}
 }

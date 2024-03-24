@@ -4,7 +4,6 @@ import goryachev.common.log.Log;
 import goryachev.common.util.CKit;
 import goryachev.common.util.CList;
 import goryachev.common.util.CPlatform;
-import goryachev.common.util.GlobalSettings;
 import goryachev.common.util.IDisconnectable;
 import goryachev.common.util.SystemTask;
 import goryachev.fx.internal.CssTools;
@@ -12,7 +11,7 @@ import goryachev.fx.internal.DisconnectableIntegerListener;
 import goryachev.fx.internal.FxSchema;
 import goryachev.fx.internal.FxStyleHandler;
 import goryachev.fx.internal.ParentWindow;
-import goryachev.fx.internal.WindowsFx;
+import goryachev.fx.internal.WindowMgr;
 import goryachev.fx.table.FxTable;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -98,7 +97,6 @@ public final class FX
 	public static final double DEGREES_PER_RADIAN = 180.0 / Math.PI;
 	public static final double GAMMA = 2.2;
 	public static final double ONE_OVER_GAMMA = 1.0 / GAMMA;
-	private static WindowsFx windowsFx = new WindowsFx();
 	private static Text helper;
 	private static final Object PROP_TOOLTIP = new Object();
 
@@ -115,39 +113,6 @@ public final class FX
 			}
 		}
 		return null;
-	}
-	
-	
-	public static void storeSettings(Node n)
-	{
-		if(n != null)
-		{
-			windowsFx.storeNode(n);
-			GlobalSettings.save();
-		}
-	}
-	
-	
-	public static void restoreSettings(Node n)
-	{
-		if(n != null)
-		{
-			windowsFx.restoreNode(n);
-		}
-	}
-	
-	
-	public static void storeSettings(FxWindow w)
-	{
-		windowsFx.storeWindow(w);
-		GlobalSettings.save();
-	}
-	
-	
-	public static void restoreSettings(FxWindow w)
-	{
-		windowsFx.restoreWindow(w);
-		GlobalSettings.save();
 	}
 	
 	
@@ -174,31 +139,19 @@ public final class FX
 	 */ 
 	public static void openWindows(Function<String,FxWindow> generator, Class<? extends FxWindow> defaultWindowType)
 	{
-		windowsFx.openWindows(generator, defaultWindowType);
-	}
-	
-	
-	public static void open(FxWindow w)
-	{
-		windowsFx.open(w);
-	}
-	
-	
-	public static void close(FxWindow w)
-	{
-		windowsFx.close(w);
+		WindowMgr.openWindows(generator, defaultWindowType);
 	}
 	
 	
 	public static void exit()
 	{
-		windowsFx.exit();
+		WindowMgr.exit();
 	}
 	
 	
 	public static FxAction exitAction()
 	{
-		return windowsFx.exitAction();
+		return WindowMgr.exitAction();
 	}
 	
 	
@@ -766,19 +719,6 @@ public final class FX
 	}
 	
 	
-	/** assign a name to the node for the purposes of saving settings */
-	public static void setName(Node n, String name)
-	{
-		FxSchema.setName(n, name);
-	}
-	
-	
-	public static String getName(Node n)
-	{
-		return FxSchema.getName(n);
-	}
-	
-	
 	/** 
 	 * attaches a handler to be notified when settings for the node have been loaded.  
 	 * setting null clears the handler 
@@ -1020,7 +960,7 @@ public final class FX
 	
 	public static void storeSettings()
 	{
-		windowsFx.storeSettings();
+		WindowMgr.storeSettings();
 	}
 	
 	
@@ -1071,20 +1011,6 @@ public final class FX
 				((FxAction)x).setDisabled(on);
 			}
 		}
-	}
-	
-	
-	/** adds a callback which will be invoked before any FxWindow gets shown */
-	public static void addWindowMonitor(Consumer<FxWindow> monitor)
-	{
-		windowsFx.addWindowMonitor(monitor);
-	}
-	
-	
-	/** removes a window monitor */
-	public static void removeWindowMonitor(Consumer<FxWindow> monitor)
-	{
-		windowsFx.removeWindowMonitor(monitor);
 	}
 	
 

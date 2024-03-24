@@ -1,5 +1,6 @@
 // Copyright © 2023-2024 Andy Goryachev <andy@goryachev.com>
 package goryachev.demo;
+import goryachev.fx.FX;
 import goryachev.fx.FxButton;
 import goryachev.fx.FxDump;
 import goryachev.fx.FxMenuBar;
@@ -322,10 +323,16 @@ public class MainWindow extends FxWindow
 	private FxMenuBar createMenu()
 	{
 		FxMenuBar m = new FxMenuBar();
+		// file
 		m.menu("File");
 		m.item("Add Note", this::addItem);
+		m.separator();
+		m.item("Quit", FX.exitAction());
+		// edit
 		m.menu("Edit");
+		// window
 		m.menu("Window");
+		// help
 		m.menu("Help");
 		return m;
 	}

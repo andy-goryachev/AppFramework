@@ -5,22 +5,45 @@ import goryachev.common.util.SB;
 import goryachev.common.util.SStream;
 import goryachev.fx.FX;
 import goryachev.fx.FxDialog;
-import goryachev.fx.FxWindow;
+import goryachev.fx.FxSettings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.ListView;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.TilePane;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Shape;
+import javafx.stage.Modality;
+import javafx.stage.PopupWindow;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 
 
 /**
- * Keys and functions used to store ui settings.
+ * Keys and functions used to store the user preferences.
  */
 public class FxSchema
 {
@@ -43,161 +66,618 @@ public class FxSchema
 	public static final String WINDOW_NORMAL = "N";
 	
 	private static final Object PROP_LOAD_HANDLER = new Object();
-	private static final Object PROP_NAME = new Object();
 	private static final Object PROP_SKIP_SETTINGS = new Object();
 	
 	
-	public static void storeWindow(String prefix, FxWindow win)
+	public static void storeWindow(Window win)
 	{
-		double x = win.getNormalX();
-		double y = win.getNormalY();
-		double w = win.getNormalWidth();
-		double h = win.getNormalHeight();
-		
-		SStream s = new SStream();
-		s.add(x);
-		s.add(y);
-		s.add(w);
-		s.add(h);
-		
-		if(win.isFullScreen())
+		WinMonitor m = WinMonitor.forWindow(win);
+		if(m != null)
 		{
-			s.add(WINDOW_FULLSCREEN);
-		}
-		else if(win.isMaximized())
-		{
-			s.add(WINDOW_MAXIMIZED);
-		}
-		else if(win.isIconified())
-		{
-			s.add(WINDOW_ICONIFIED);
-		}
-		else
-		{
-			s.add(WINDOW_NORMAL);
-		}
-
-		GlobalSettings.setStream(FX_PREFIX + prefix, s);
-	}
-	
-	
-	public static void restoreWindow(String prefix, FxWindow win)
-	{
-		try
-		{
-			String id = FX_PREFIX + prefix;
-			SStream s = GlobalSettings.getStream(id);
-			double x = s.nextDouble(-1);
-			double y = s.nextDouble(-1);
-			double w = s.nextDouble(-1);
-			double h = s.nextDouble(-1);
-			String state = s.nextString(WINDOW_NORMAL);
+			double x = m.getX();
+			double y = m.getY();
+			double w = m.getW();
+			double h = m.getH();
 			
-			if((w > 0) && (h > 0))
+			SStream ss = new SStream();
+			ss.add(x);
+			ss.add(y);
+			ss.add(w);
+			ss.add(h);
+			
+			if(win instanceof Stage s)
 			{
-				if
-				(
-					FX.isValidCoordinates(x, y) &&
-					(!(win instanceof FxDialog))
-				)
+				if(s.isFullScreen())
 				{
-					// iconified windows have (x,y) of -32000 for some reason
-					// their coordinates are essentially lost (unless there is a way to get them in FX)
-					win.setX(x);
-					win.setY(y);
+					ss.add(WINDOW_FULLSCREEN);
 				}
-				
-				if(win.isResizable())
+				else if(s.isMaximized())
 				{
-					win.setWidth(w);
-					win.setHeight(h);
+					ss.add(WINDOW_MAXIMIZED);
+				}
+				else if(s.isIconified())
+				{
+					ss.add(WINDOW_ICONIFIED);
 				}
 				else
 				{
-					w = win.getWidth();
-					h = win.getHeight();
+					ss.add(WINDOW_NORMAL);
 				}
+			}
+
+			GlobalSettings.setStream(FX_PREFIX + m.getID(), ss);
+			
+			Node n = win.getScene().getRoot();
+            storeNode(n);
+		}
+	}
+	
+	
+	public static void restoreWindow(Window win)
+	{
+		if(win instanceof PopupWindow)
+		{
+			return;
+		}
+		else if(win instanceof Stage s)
+		{
+			if(s.getModality() != Modality.NONE)
+			{
+				return;
+			}
+		}
+		
+		WinMonitor m = WinMonitor.forWindow(win);
+		if(m != null)
+		{
+			SStream ss = GlobalSettings.getStream(FX_PREFIX + m.getID());
+			if(ss != null)
+			{
+				double x = ss.nextDouble(-1);
+				double y = ss.nextDouble(-1);
+				double w = ss.nextDouble(-1);
+				double h = ss.nextDouble(-1);
+				String state = ss.nextString(WINDOW_NORMAL);
 				
-				switch(state)
+				if((w > 0) && (h > 0))
 				{
-//				case WINDOW_ICONIFIED:
-//					win.setIconified(true);
-//					break;
-				case WINDOW_FULLSCREEN:
-					win.setFullScreen(true);
-					break;
-				case WINDOW_MAXIMIZED:
-					win.setMaximized(true);
-					break;
-				}
-				
-				if(win instanceof FxDialog)
-				{
-					FxDialog d = (FxDialog)win;
-					Window parent = d.getOwner();
-					if(parent != null)
+					if
+					(
+						FX.isValidCoordinates(x, y) &&
+						(!(win instanceof FxDialog))
+					)
 					{
-						double cx = parent.getX() + (parent.getWidth() / 2);
-						double cy = parent.getY() + (parent.getHeight() / 2);
-						// TODO check 
-						d.setX(cx - w/2);
-						d.setY(cy - h/2);
+						// iconified windows have (x,y) of -32000 for some reason
+						// their coordinates are essentially lost (unless there is a way to get them in FX)
+						win.setX(x);
+						win.setY(y);
+					}
+
+					if(win instanceof Stage s)
+					{
+						if(s.isResizable())
+						{
+							win.setWidth(w);
+							win.setHeight(h);
+						}
+						else
+						{
+							w = win.getWidth();
+							h = win.getHeight();
+						}
+						
+						switch(state)
+						{
+						case WINDOW_FULLSCREEN:
+							s.setFullScreen(true);
+							break;
+						case WINDOW_MAXIMIZED:
+							s.setMaximized(true);
+							break;
+						}
+						
+						if(win instanceof FxDialog d)
+						{
+							Window parent = d.getOwner();
+							if(parent != null)
+							{
+								double cx = parent.getX() + (parent.getWidth() / 2);
+								double cy = parent.getY() + (parent.getHeight() / 2);
+								// TODO check 
+								d.setX(cx - w/2);
+								d.setY(cy - h/2);
+							}
+						}
 					}
 				}
 			}
+			
+			Node n = win.getScene().getRoot();
+            restoreNode(n);
 		}
-		catch(Exception e)
-		{ }
-	}
-	
-
-	private static void storeLocalSettings(String prefix, LocalSettings s)
-	{
-		String k = prefix + SFX_SETTINGS;
-		s.saveValues(k);
-	}
-	
-	
-	private static void restoreLocalSettings(String prefix, LocalSettings s)
-	{
-		String k = prefix + SFX_SETTINGS;
-		s.loadValues(k);
 	}
 
-	
-	private static void storeSplitPane(String prefix, SplitPane sp)
+
+	public static void storeNode(Node n)
 	{
-		SStream s = new SStream();
-		s.add(sp.getDividers().size());
-		s.addAll(sp.getDividerPositions());
-		
-		String k = prefix + SFX_DIVIDERS;
-		GlobalSettings.setStream(k, s);
-	}
-	
-	
-	private static void restoreSplitPane(String prefix, SplitPane sp)
-	{
-		String k = prefix + SFX_DIVIDERS;
-		SStream s = GlobalSettings.getStream(k);
-		
-		// must run later because of FX split pane inability to set divider positions exactly
-		FX.later(() ->
+		if(isSkipSettings(n))
 		{
-			int ct = s.nextInt();
-			if(sp.getDividers().size() == ct)
+			return;
+		}
+
+		String name = computeName(n);
+		if(name == null)
+		{
+			return;
+		}
+
+		LocalSettings s = LocalSettings.find(n);
+		if(s != null)
+		{
+			String k = name + SFX_SETTINGS;
+			s.saveValues(k);
+		}
+
+		// TODO first: actual nodes
+		// TODO second: nodes with single content node (ex.: TitledPane)
+		// TODO third: nodes with multiple items (ex.: TabPane)
+		if(n instanceof CheckBox cb)
+		{
+			storeCheckBox(cb, name);
+		}
+		else if(n instanceof ComboBox cb)
+		{
+			storeComboBox(cb, name);
+		}
+		else if(n instanceof ListView v)
+		{
+			storeListView(v, name);
+		}
+		else if(n instanceof SplitPane sp)
+		{
+			storeSplitPane(sp, name);
+		}
+		else if(n instanceof ScrollPane sp)
+		{
+			storeNode(sp.getContent());
+		}
+		else if(n instanceof TitledPane tp)
+		{
+			storeNode(tp.getContent());
+		}
+		else if(n instanceof TableView t)
+		{
+			storeTableView(t, name);
+		}
+		else if(n instanceof TabPane t)
+		{
+			storeTabPane(t, name);
+		}
+		else
+		{
+			if(n instanceof Parent p)
 			{
-				for(int i=0; i<ct; i++)
+				for(Node ch: p.getChildrenUnmodifiable())
 				{
-					double div = s.nextDouble();
-					sp.setDividerPosition(i, div);
+					storeNode(ch);
 				}
 			}
-		});
+		}
 	}
 	
 	
-	private static void storeTableView(String prefix, TableView t)
+	public static void restoreNode(Node n)
+	{
+		if(isSkipSettings(n))
+		{
+			return;
+		}
+
+		if(handleNullScene(n))
+		{
+			return;
+		}
+		
+		String name = computeName(n);
+		if(name == null)
+		{
+			return;
+		}
+
+		LocalSettings s = LocalSettings.find(n);
+		if(s != null)
+		{
+			String k = name + SFX_SETTINGS;
+			s.loadValues(k);
+		}
+
+		// TODO first: actual nodes
+		// TODO second: nodes with single content node (ex.: TitledPane)
+		// TODO third: nodes with multiple items (ex.: TabPane)
+		if(n instanceof CheckBox cb)
+		{
+			restoreCheckBox(cb, name);
+		}
+		else if(n instanceof ComboBox cb)
+		{
+			restoreComboBox(cb, name);
+		}
+		else if(n instanceof ListView v)
+		{
+			restoreListView(v, name);
+		}
+		else if(n instanceof SplitPane sp)
+		{
+			restoreSplitPane(sp, name);
+		}
+		else if(n instanceof ScrollPane sp)
+		{
+			restoreNode(sp.getContent());
+		}
+		else if(n instanceof TitledPane tp)
+		{
+			restoreNode(tp.getContent());
+		}
+		else if(n instanceof TableView t)
+		{
+			restoreTableView(t, name);
+		}
+		else if(n instanceof TabPane t)
+		{
+			restoreTabPane(t, name);
+		}
+		else
+		{
+			if(n instanceof Parent p)
+			{
+				for(Node ch: p.getChildrenUnmodifiable())
+				{
+					restoreNode(ch);
+				}
+			}
+		}
+
+		// TODO is this really needed?
+		Runnable r = getOnSettingsLoaded(n);
+		if(r != null)
+		{
+			r.run();
+		}
+	}
+	
+
+	// TODO reverse the logic?
+	private static boolean handleNullScene(Node node)
+	{
+		if(node == null)
+		{
+			return true;
+		}
+		else if(node.getScene() == null)
+		{
+			node.sceneProperty().addListener(new ChangeListener<Scene>()
+			{
+				public void changed(ObservableValue<? extends Scene> src, Scene old, Scene scene)
+				{
+					if(scene != null)
+					{
+						Window w = scene.getWindow();
+						if(w != null)
+						{
+							node.sceneProperty().removeListener(this);
+							restoreNode(node);
+						}
+					}
+				}
+			});
+			return true;
+		}
+		return false;
+	}
+
+
+	// FIX rename
+	private static String computeName(Node n)
+	{
+		WinMonitor m = WinMonitor.forNode(n);
+		if(m != null)
+		{
+			SB sb = new SB();
+			if(collectNames(sb, n))
+			{
+				return null;
+			}
+
+			String id = m.getID();
+			return id + sb;
+		}
+		return null;
+	}
+
+
+	// returns true if Node should be ignored
+	// FIX reverse logic, rename
+	private static boolean collectNames(SB sb, Node n)
+	{
+		if(n instanceof MenuBar)
+		{
+			return true;
+		}
+		else if(n instanceof Shape)
+		{
+			return true;
+		}
+		else if(n instanceof ImageView)
+		{
+			return true;
+		}
+
+		Parent p = n.getParent();
+		if(p != null)
+		{
+			if(collectNames(sb, p))
+			{
+				return true;
+			}
+		}
+
+		String name = getNodeName(n);
+		if(name == null)
+		{
+			return true;
+		}
+
+		sb.append('.');
+		sb.append(name);
+		return false;
+	}
+
+
+	private static String getNodeName(Node n)
+	{
+		if(n != null)
+		{
+			String name = FxSettings.getName(n);
+			if(name != null)
+			{
+				return name;
+			}
+
+			if(n instanceof Pane)
+			{
+				if(n instanceof AnchorPane)
+				{
+					return "AnchorPane";
+				}
+				else if(n instanceof BorderPane)
+				{
+					return "BorderPane";
+				}
+				else if(n instanceof DialogPane)
+				{
+					return "DialogPane";
+				}
+				else if(n instanceof FlowPane)
+				{
+					return "FlowPane";
+				}
+				else if(n instanceof GridPane)
+				{
+					return "GridPane";
+				}
+				else if(n instanceof HBox)
+				{
+					return "HBox";
+				}
+				else if(n instanceof StackPane)
+				{
+					return "StackPane";
+				}
+				else if(n instanceof TilePane)
+				{
+					return "TilePane";
+				}
+				else if(n instanceof VBox)
+				{
+					return "VBox";
+				}
+				else
+				{
+					return "Pane";
+				}
+			}
+			else if(n instanceof Group)
+			{
+				return "Group";
+			}
+			else if(n instanceof Region)
+			{
+				return "Region";
+			}
+		}
+		return null;
+	}
+
+
+	public static void setOnSettingsLoaded(Node n, Runnable r)
+	{
+		n.getProperties().put(PROP_LOAD_HANDLER, r);
+	}
+	
+	
+	private static Runnable getOnSettingsLoaded(Node n)
+	{
+		Object x = n.getProperties().get(PROP_LOAD_HANDLER);
+		if(x instanceof Runnable)
+		{
+			return (Runnable)x;
+		}
+		return null;
+	}
+	
+	
+	public static void setSkipSettings(Node n)
+	{
+		n.getProperties().put(PROP_SKIP_SETTINGS, Boolean.TRUE);
+	}
+	
+	
+	public static boolean isSkipSettings(Node n)
+	{
+		Object x = n.getProperties().get(PROP_SKIP_SETTINGS);
+		return Boolean.TRUE.equals(x);
+	}
+
+
+	private static void storeCheckBox(CheckBox n, String name)
+	{
+		boolean sel = n.isSelected();
+		GlobalSettings.setBoolean(FX_PREFIX + name, sel);
+	}
+
+
+	private static void restoreCheckBox(CheckBox n, String name)
+	{
+		Boolean sel = GlobalSettings.getBoolean(FX_PREFIX + name);
+		if(sel != null)
+		{
+			n.setSelected(sel);
+		}
+	}
+
+
+	private static void storeComboBox(ComboBox n, String name)
+	{
+		if(n.getSelectionModel() != null)
+		{
+			int ix = n.getSelectionModel().getSelectedIndex();
+			if(ix >= 0)
+			{
+				GlobalSettings.setInt(FX_PREFIX + name, ix);
+			}
+		}
+	}
+
+
+	private static void restoreComboBox(ComboBox n, String name)
+	{
+		if(n.getSelectionModel() != null)
+		{
+			int ix = GlobalSettings.getInt(FX_PREFIX + name, -1);
+			if((ix >= 0) && (ix < n.getItems().size()))
+			{
+				n.getSelectionModel().select(ix);
+			}
+		}
+	}
+
+
+	private static void storeListView(ListView n, String name)
+	{
+		if(n.getSelectionModel() != null)
+		{
+			int ix = n.getSelectionModel().getSelectedIndex();
+			if(ix >= 0)
+			{
+				GlobalSettings.setInt(FX_PREFIX + name, ix);
+			}
+		}
+	}
+
+
+	private static void restoreListView(ListView n, String name)
+	{
+		if(n.getSelectionModel() != null)
+		{
+			int ix = GlobalSettings.getInt(FX_PREFIX + name, -1);
+			if((ix >= 0) && (ix < n.getItems().size()))
+			{
+				n.getSelectionModel().select(ix);
+			}
+		}
+	}
+
+
+	private static void storeSplitPane(SplitPane sp, String name)
+	{
+		double[] div = sp.getDividerPositions();
+		SStream ss = new SStream();
+		ss.add(div.length);
+		ss.addAll(div);
+		GlobalSettings.setStream(FX_PREFIX + name, ss);
+
+		for(Node ch: sp.getItems())
+		{
+			storeNode(ch);
+		}
+	}
+
+	
+//	TODO
+//	private static void storeSplitPane(String prefix, SplitPane sp)
+//	{
+//		SStream s = new SStream();
+//		s.add(sp.getDividers().size());
+//		s.addAll(sp.getDividerPositions());
+//		
+//		String k = prefix + SFX_DIVIDERS;
+//		GlobalSettings.setStream(k, s);
+//	}
+	
+
+	private static void restoreSplitPane(SplitPane sp, String name)
+	{
+		for(Node ch: sp.getItems())
+		{
+			restoreNode(ch);
+		}
+
+		SStream ss = GlobalSettings.getStream(FX_PREFIX + name);
+		if(ss != null)
+		{
+			int sz = ss.nextInt(-1);
+			if(sz > 0)
+			{
+				double[] divs = new double[sz];
+				for(int i=0; i<sz; i++)
+				{
+					double v = ss.nextDouble(-1);
+					if(v < 0)
+					{
+						return;
+					}
+					divs[i] = v;
+				}
+				// FIX does not work
+				// sp.setDividerPositions(divs);
+			}
+		}
+	}
+	
+	
+//	TODO
+//	private static void restoreSplitPane(String prefix, SplitPane sp)
+//	{
+//		String k = prefix + SFX_DIVIDERS;
+//		SStream s = GlobalSettings.getStream(k);
+//		
+//		// must run later because of FX split pane inability to set divider positions exactly
+//		FX.later(() ->
+//		{
+//			int ct = s.nextInt();
+//			if(sp.getDividers().size() == ct)
+//			{
+//				for(int i=0; i<ct; i++)
+//				{
+//					double div = s.nextDouble();
+//					sp.setDividerPosition(i, div);
+//				}
+//			}
+//		});
+//	}
+	
+	
+	private static void storeTableView(TableView t, String name)
 	{
 		ObservableList<TableColumn<?,?>> cs = t.getColumns();
 		int sz = cs.size();
@@ -229,67 +709,61 @@ public class FxSchema
 			s.add(c.getWidth());
 			s.add(sortOrder);
 		}
-		// FIX separate columns and width/sort
-		GlobalSettings.setStream(prefix + SFX_COLUMNS, s);
+		GlobalSettings.setStream(FX_PREFIX + name + SFX_COLUMNS, s);
 		
 		// selection
 		int ix = t.getSelectionModel().getSelectedIndex();
-		GlobalSettings.setInt(prefix + SFX_SELECTION, ix);
+		if(ix >= 0)
+		{
+			GlobalSettings.setInt(FX_PREFIX + name + SFX_SELECTION, ix);
+		}
 	}
 	
 	
-	private static void restoreTableView(String prefix, TableView t)
+	private static void restoreTableView(TableView t, String name)
 	{
 		ObservableList<TableColumn<?,?>> cs = t.getColumns();
 		
 		// columns
-		SStream s = GlobalSettings.getStream(prefix + SFX_COLUMNS);
-		int sz = s.nextInt();
-		if(sz == cs.size())
+		SStream ss = GlobalSettings.getStream(FX_PREFIX + name + SFX_COLUMNS);
+		if(ss != null)
 		{
-			for(int i=0; i<sz; i++)
+			int sz = ss.nextInt();
+			if(sz == cs.size())
 			{
-				TableColumn<?,?> c = cs.get(i);
-				
-				String id = s.nextString();
-				double w = s.nextDouble();
-				int sortOrder = s.nextInt();
-				
-				// TODO
+				for(int i=0; i<sz; i++)
+				{
+					TableColumn<?,?> c = cs.get(i);
+					
+					String id = ss.nextString();
+					double w = ss.nextDouble();
+					int sortOrder = ss.nextInt();
+					
+					// TODO
+				}
 			}
 		}
 		
-		// selection
-		int ix = GlobalSettings.getInt(prefix + SFX_SELECTION, -1);
+		int ix = GlobalSettings.getInt(FX_PREFIX + name + SFX_SELECTION, -1);
 		if(ix >= 0)
 		{
-			// if done immediately it screws up the selection model for some reason
-			// FIX does not select for some reason.
-			/* TODO 
-			FX.later(() ->
-			{
-				if(ix < t.getItems().size())
-				{
-					t.getSelectionModel().select(ix);
-				}
-			});
-			*/
+			// TODO
 		}
 	}
 	
 	
-	private static void storeTabPane(String prefix, TabPane p)
+	private static void storeTabPane(TabPane p, String name)
 	{
 		// selection
 		int ix = p.getSelectionModel().getSelectedIndex();
-		GlobalSettings.setInt(prefix + SFX_SELECTION, ix);
+		GlobalSettings.setInt(FX_PREFIX + name + SFX_SELECTION, ix);
 	}
 	
 	
-	private static void restoreTabPane(String prefix, TabPane p)
+	private static void restoreTabPane(TabPane p, String name)
 	{
 		// selection
-		int ix = GlobalSettings.getInt(prefix + SFX_SELECTION, -1);
+		int ix = GlobalSettings.getInt(FX_PREFIX + name + SFX_SELECTION, -1);
 		if(ix >= 0)
 		{
 			FX.later(() ->
@@ -300,216 +774,5 @@ public class FxSchema
 				}
 			});
 		}
-	}
-	
-	
-	/** returns full path for the Node, starting with the window id, or null if saving is not permitted */
-	private static String getFullName(String windowPrefix, Node root, Node n)
-	{
-		String name = getName(n);
-		if(name == null)
-		{
-			return null;
-		}
-		
-		SB sb = getFullNamePrivate(windowPrefix, null, root, n);
-		return sb == null ? null : sb.toString();
-	}
-
-
-	private static SB getFullNamePrivate(String windowPrefix, SB sb, Node root, Node n)
-	{
-		if(n == null)
-		{
-			return null;
-		}
-		
-		String name = getName(n);
-		if(name == null)
-		{
-			return null;
-		}
-		
-		if(n == root)
-		{
-			sb = new SB();
-			sb.a(FX_PREFIX);
-			sb.a(windowPrefix);
-		}
-		else
-		{
-			Parent p = n.getParent();
-			if(p == null)
-			{
-				return null;
-			}
-			
-			sb = getFullNamePrivate(windowPrefix, sb, root, p);
-			if(sb == null)
-			{
-				return null;
-			}
-			
-			sb.a('.');
-			sb.a(name);
-		}
-		return sb;
-	}
-	
-
-	public static void storeNode(String windowPrefix, Node root, Node n)
-	{
-		String name = getFullName(windowPrefix, root, n);
-		if(name == null)
-		{
-			return;
-		}
-		
-		LocalSettings s = LocalSettings.find(n);
-		if(s != null)
-		{
-			storeLocalSettings(name, s);
-		}
-		
-		if(!isSkipSettings(n))
-		{
-			if(n instanceof SplitPane)
-			{
-				storeSplitPane(name, (SplitPane)n);
-			}
-			else if(n instanceof TableView)
-			{
-				storeTableView(name, (TableView)n);
-			}
-			else if(n instanceof TabPane)
-			{
-				storeTabPane(name, (TabPane)n);
-			}
-		}
-		
-		if(n instanceof Parent)
-		{
-			for(Node ch: ((Parent)n).getChildrenUnmodifiable())
-			{
-				storeNode(windowPrefix, root, ch);
-			}
-		}
-		
-		// TODO trigger runnable
-	}
-	
-	
-	public static void restoreNode(String windowPrefix, Node root, Node n)
-	{
-		// TODO skip property
-				
-		String name = getFullName(windowPrefix, root, n);
-		if(name == null)
-		{
-			return;
-		}
-		
-		if(!isSkipSettings(n))
-		{
-			if(n instanceof SplitPane)
-			{
-				restoreSplitPane(name, (SplitPane)n);
-			}
-			else if(n instanceof TableView)
-			{
-				restoreTableView(name, (TableView)n);
-			}
-			else if(n instanceof TabPane)
-			{
-				restoreTabPane(name, (TabPane)n);
-			}
-		}
-		
-		if(n instanceof Parent)
-		{
-			for(Node ch: ((Parent)n).getChildrenUnmodifiable())
-			{
-				restoreNode(windowPrefix, root, ch);
-			}
-		}
-		
-		LocalSettings s = LocalSettings.find(n);
-		if(s != null)
-		{
-			restoreLocalSettings(name, s);
-		}
-		
-		Runnable r = getOnSettingsLoaded(n);
-		if(r != null)
-		{
-			r.run();
-		}
-	}
-	
-	
-	public static void setName(Node n, String name)
-	{
-		n.getProperties().put(PROP_NAME, name);
-	}
-	
-	
-	public static String getName(Node n)
-	{
-		Object x = n.getProperties().get(PROP_NAME);
-		if(x instanceof String)
-		{
-			return (String)x;
-		}
-		
-		if(n instanceof MenuBar)
-		{
-			return null;
-		}
-		else if(n instanceof Shape)
-		{
-			return null;
-		}
-		else if(n instanceof ImageView)
-		{
-			return null;
-		}
-		
-		String id = n.getId();
-		if(id != null)
-		{
-			return id;
-		}
-				
-		return n.getClass().getSimpleName();
-	}
-	
-	
-	public static void setOnSettingsLoaded(Node n, Runnable r)
-	{
-		n.getProperties().put(PROP_LOAD_HANDLER, r);
-	}
-	
-	
-	private static Runnable getOnSettingsLoaded(Node n)
-	{
-		Object x = n.getProperties().get(PROP_LOAD_HANDLER);
-		if(x instanceof Runnable)
-		{
-			return (Runnable)x;
-		}
-		return null;
-	}
-	
-	
-	public static void setSkipSettings(Node n)
-	{
-		n.getProperties().put(PROP_SKIP_SETTINGS, Boolean.TRUE);
-	}
-	
-	
-	public static boolean isSkipSettings(Node n)
-	{
-		Object x = n.getProperties().get(PROP_SKIP_SETTINGS);
-		return Boolean.TRUE.equals(x);
 	}
 }
