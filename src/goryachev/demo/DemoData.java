@@ -15,11 +15,16 @@ import javafx.scene.paint.Color;
  */
 public class DemoData
 {
-	private static ObservableList<Message> messages;
-	private static Gallery gallery;
+	private ObservableList<Message> messages;
+	private Gallery gallery;
 	
 	
-	public static ObservableList<Message> getMessages()
+	public DemoData()
+	{
+	}
+	
+	
+	public ObservableList<Message> getMessages()
 	{
 		if(messages == null)
 		{
@@ -269,7 +274,7 @@ public class DemoData
 	}
 
 	
-	public static Gallery getGallery()
+	public Gallery getGallery()
 	{
 		if(gallery == null)
 		{

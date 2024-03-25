@@ -11,7 +11,6 @@ import goryachev.fx.icon.FindIcon;
 import goryachev.fx.icon.GalleryIcon;
 import goryachev.fx.icon.HamburgerIcon;
 import goryachev.fx.icon.StarIcon;
-import javafx.collections.ObservableList;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -31,7 +30,7 @@ public class MainWindow extends FxWindow
 {
 	private final int ICON_SIZE = 20;
 
-	protected final ObservableList<Message> items;
+	protected final DemoData data;
 	protected final TextField searchField;
 	protected final MessageListWithPreviewPane listView;
 	protected final MessageTableListWithPreviewPane listTable;
@@ -39,11 +38,11 @@ public class MainWindow extends FxWindow
 	protected final TableWithPreviewPane tableView;
 	
 	
-	public MainWindow(ObservableList<Message> items)
+	public MainWindow(DemoData d)
 	{
 		super("MainWindow");
 		
-		this.items = items;
+		this.data = d;
 
 		setTitle("App Framework Demo Window");
 		setSize(1150, 800);
@@ -51,13 +50,13 @@ public class MainWindow extends FxWindow
 		searchField = new TextField();
 		searchField.setPrefColumnCount(20);
 
-		listView = new MessageListWithPreviewPane(items);
+		listView = new MessageListWithPreviewPane(data.getMessages());
 		
-		listTable = new MessageTableListWithPreviewPane(items);
+		listTable = new MessageTableListWithPreviewPane(data.getMessages());
 		
-		galleryView = new GalleryView();
+		galleryView = new GalleryView(data.getGallery());
 		
-		tableView = new TableWithPreviewPane(items);
+		tableView = new TableWithPreviewPane(data.getMessages());
 		
 		// TODO .tab-header-area style
 		FxTabPane sidePane = new FxTabPane();
@@ -146,13 +145,13 @@ public class MainWindow extends FxWindow
 	protected void addItem()
 	{
 		Message en = new Message(String.valueOf(System.currentTimeMillis()), "sample");
-		items.add(0, en);
+		data.getMessages().add(0, en);
 		listView.select(en);
 	}
 	
 	
 	protected void newWindow()
 	{
-		new MainWindow(items).open();
+		new MainWindow(data).open();
 	}
 }

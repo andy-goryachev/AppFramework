@@ -37,8 +37,8 @@ public class FrameworkDemoApp extends Application
 		CssLoader.setStyles(Styles::new);
 
 		// create/load data and open the main window
-		var messages = DemoData.getMessages();
-		MainWindow w = new MainWindow(messages);
+		DemoData d = new DemoData();
+		MainWindow w = new MainWindow(d);
 		w.open();
 	}
 }
