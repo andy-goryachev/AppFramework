@@ -204,6 +204,11 @@ public class FxSchema
 
 	public static void storeNode(Node n)
 	{
+		if(n == null)
+		{
+			return;
+		}
+
 		if(isSkipSettings(n))
 		{
 			return;
