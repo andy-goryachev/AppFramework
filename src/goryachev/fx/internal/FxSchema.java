@@ -274,6 +274,11 @@ public class FxSchema
 	
 	public static void restoreNode(Node n)
 	{
+		if(n == null)
+		{
+			return;
+		}
+
 		if(isSkipSettings(n))
 		{
 			return;
