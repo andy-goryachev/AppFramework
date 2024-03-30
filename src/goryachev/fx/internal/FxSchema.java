@@ -69,6 +69,7 @@ public class FxSchema
 	private static final String WINDOW_ICONIFIED = "I";
 	private static final String WINDOW_NORMAL = "N";
 	
+	@Deprecated // FIX remove
 	private static final Object PROP_LOAD_HANDLER = new Object();
 	private static final Object PROP_SKIP_SETTINGS = new Object();
 	
@@ -514,12 +515,15 @@ public class FxSchema
 	}
 
 
+	@Deprecated // FIX remove
+	// replace with binding properties to LocalSettings
 	public static void setOnSettingsLoaded(Node n, Runnable r)
 	{
 		n.getProperties().put(PROP_LOAD_HANDLER, r);
 	}
 	
 	
+	@Deprecated // FIX remove
 	private static Runnable getOnSettingsLoaded(Node n)
 	{
 		Object x = n.getProperties().get(PROP_LOAD_HANDLER);

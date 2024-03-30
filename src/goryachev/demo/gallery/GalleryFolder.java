@@ -1,5 +1,5 @@
 // Copyright © 2023-2024 Andy Goryachev <andy@goryachev.com>
-package goryachev.demo;
+package goryachev.demo.gallery;
 import goryachev.fx.FxString;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;

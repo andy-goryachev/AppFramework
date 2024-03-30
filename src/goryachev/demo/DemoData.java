@@ -1,6 +1,9 @@
 // Copyright © 2024 Andy Goryachev <andy@goryachev.com>
 package goryachev.demo;
 import goryachev.common.util.MurmurHash3;
+import goryachev.demo.gallery.Gallery;
+import goryachev.demo.gallery.GalleryFolder;
+import goryachev.demo.gallery.GalleryItem;
 import java.util.Random;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -326,11 +329,9 @@ public class DemoData
 
 	private static GalleryItem mkItem(int seq, int num)
 	{
-		int c = MurmurHash3.hash(seq + "." + num, 0);
-		int r = (c >> 16) & 0xff;
-		int g = (c >> 8) & 0xff;
-		int b = c & 0xff;
-		Color col = Color.rgb(r, g, b);
+		int x = MurmurHash3.hash(seq + "." + num, 0) & 0x7fffffff;
+		double hue = (x % 360);
+		Color col = Color.hsb(hue, 0.5, 0.5);
 		
 		return new GalleryItem()
 		{

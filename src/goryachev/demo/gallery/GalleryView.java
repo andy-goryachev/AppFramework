@@ -1,10 +1,8 @@
 // Copyright © 2023-2024 Andy Goryachev <andy@goryachev.com>
-package goryachev.demo;
-import goryachev.common.util.D;
+package goryachev.demo.gallery;
 import goryachev.fx.FxObject;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyDoubleProperty;
-import javafx.beans.property.ReadOnlyDoubleWrapper;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.geometry.HPos;
 import javafx.geometry.Orientation;
 import javafx.geometry.VPos;
@@ -24,7 +22,7 @@ public class GalleryView
 	extends BorderPane
 {
 	private final FxObject<Gallery> gallery = new FxObject<>();
-	private final ReadOnlyDoubleWrapper topOffset = new ReadOnlyDoubleWrapper();
+	private final FxObject<Origin> origin = new FxObject<>(Origin.ZERO);
 	private final int size = 128; // TODO property
 	// TODO vgap
 	// TODO hgap
@@ -66,21 +64,21 @@ public class GalleryView
 	}
 	
 	
-	public final ReadOnlyDoubleProperty topOffsetProperty()
+	public final ReadOnlyObjectProperty<Origin> originProperty()
 	{
-		return topOffset.getReadOnlyProperty();
+		return origin.getReadOnlyProperty();
 	}
 	
 	
-	public final double getTopOffset()
+	public final Origin getOrigin()
 	{
-		return topOffset.get();
+		return origin.get();
 	}
 	
 	
-	private void setTopOffset(double v)
+	private void setTopOffset(Origin v)
 	{
-		topOffset.set(v);
+		origin.set(v);
 	}
 
 

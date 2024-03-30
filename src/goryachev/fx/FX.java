@@ -723,6 +723,7 @@ public final class FX
 	 * attaches a handler to be notified when settings for the node have been loaded.  
 	 * setting null clears the handler 
 	 */
+	@Deprecated // FIX remove
 	public static void setOnSettingsLoaded(Node n, Runnable r)
 	{
 		FxSchema.setOnSettingsLoaded(n, r);
