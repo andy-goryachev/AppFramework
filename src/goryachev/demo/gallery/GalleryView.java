@@ -1,9 +1,12 @@
 // Copyright © 2023-2024 Andy Goryachev <andy@goryachev.com>
 package goryachev.demo.gallery;
+import goryachev.fx.CssStyle;
+import goryachev.fx.FxDouble;
 import goryachev.fx.FxObject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.VPos;
 import javafx.scene.control.Label;
@@ -21,20 +24,32 @@ import javafx.scene.layout.Pane;
 public class GalleryView
 	extends BorderPane
 {
+	public static final CssStyle TOP_LABEL = new CssStyle();
+	public static final CssStyle FOLDER_LABEL = new CssStyle();
+	
 	private final FxObject<Gallery> gallery = new FxObject<>();
 	private final FxObject<Origin> origin = new FxObject<>(Origin.ZERO);
+	private FxObject<Insets> contentPadding;
+	private FxDouble hGap;
+	private FxDouble vGap;
+	
 	private final int size = 128; // TODO property
 	// TODO vgap
 	// TODO hgap
 	// TODO thumbnail size
 	// using css for: folder labels, folder content regions
 	private final Pane content;
+	private final Label topLabel;
 	private final ScrollBar scroll;
 	
 	
 	public GalleryView(Gallery g)
 	{
 		content = new Pane();
+		
+		topLabel = new Label();
+		TOP_LABEL.set(topLabel);
+		FOLDER_LABEL.set(topLabel);
 		
 		scroll = new ScrollBar();
 		scroll.setOrientation(Orientation.VERTICAL);
@@ -76,15 +91,81 @@ public class GalleryView
 	}
 	
 	
-	private void setTopOffset(Origin v)
+	private final void setOrigin(Origin v)
 	{
 		origin.set(v);
+	}
+	
+	
+	public final FxDouble vGapProperty()
+	{
+		if(vGap == null)
+		{
+			vGap = new FxDouble(0.0)
+			{
+				protected void invalidated()
+				{
+					requestLayout();
+				}
+			};
+		}
+		return vGap;
+	}
+	
+	
+	public final double getVGap()
+	{
+		return vGap == null ? 0.0 : vGap.get();
+	}
+	
+	
+	public final void setVGap(double v)
+	{
+		vGapProperty().set(v);
+	}
+	
+	
+	public final FxDouble hGapProperty()
+	{
+		if(hGap == null)
+		{
+			hGap = new FxDouble(0.0)
+			{
+				protected void invalidated()
+				{
+					requestLayout();
+				}
+			};
+		}
+		return hGap;
+	}
+	
+	
+	public final double getHGap()
+	{
+		return hGap == null ? 0.0 : hGap.get();
+	}
+	
+	
+	public final void setHGap(double v)
+	{
+		hGapProperty().set(v);
 	}
 
 
 	protected void layoutChildren()
 	{
 		super.layoutChildren();
+		
+		// TODO move to virtual flow
+		
+		//long total = computeTotalHeight();
+		Origin or = getOrigin();
+		double y = or.getYOffset();
+		double vgap = getVGap();
+		double hgap = getHGap();
+		
+		content.getChildren().clear();
 		
 		Label label = new Label("Folder A");
 		label.setOpacity(1.0);
