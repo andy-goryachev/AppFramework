@@ -153,4 +153,10 @@ public class FxWindow
 			close();
 		}
 	}
+	
+	
+	public String toString()
+	{
+		return "FxWindow{" + FxSettings.getName(this) + "." + hashCode() + "}";
+	}
 }

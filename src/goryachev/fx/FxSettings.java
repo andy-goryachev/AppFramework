@@ -4,16 +4,19 @@ import goryachev.common.util.FileSettingsProvider;
 import goryachev.common.util.GlobalSettings;
 import goryachev.common.util.GlobalSettingsProvider;
 import goryachev.fx.internal.FxSchema;
-import goryachev.fx.internal.WindowMgr;
 import java.io.File;
+import java.util.Objects;
+import java.util.function.Function;
 import javafx.scene.Node;
 import javafx.stage.Window;
 
 
 /**
  * FX Application Settings.
- * Uses GlobalSettings facility to remember the user choices made to the UI.
+ *
+ * Uses GlobalSettings facility to remember the user choices.
  */
+// TODO store screen configuration and windows positions for each configuration, listen for configuration changes
 public class FxSettings
 {
 	private static final Object PROP_NAME = new Object();
@@ -36,7 +39,25 @@ public class FxSettings
 	public static void initProvider(GlobalSettingsProvider p)
 	{
 		GlobalSettings.setProvider(p);
-		WindowMgr.init();
+	}
+	
+	
+	/** 
+	 * Opens application windows stored in the global settings.
+	 * If no settings are stored, invokes the generator with a null name to
+	 * open the main window.<p>
+	 * The generator must return a default window when supplied with a null name.
+	 * To ensure the right settings are loaded, the newly created window must remain hidden. 
+	 */ 
+	public static <W extends FxWindow> int openLayout(Function<String,W> generator)
+	{
+		return FxSchema.openLayout(generator);
+	}
+	
+	
+	public static void saveLayout()
+	{
+		FxSchema.storeLayout();
 	}
 	
 	
@@ -59,14 +80,14 @@ public class FxSettings
 	}
 	
 	
-	public static void storeSettings(Window w)
+	public static void store(Window w)
 	{
 		FxSchema.storeWindow(w);
 		GlobalSettings.save();
 	}
 	
 	
-	public static void restoreSettings(Window w)
+	public static void restore(Window w)
 	{
 		FxSchema.restoreWindow(w);
 		GlobalSettings.save();
@@ -107,6 +128,7 @@ public class FxSettings
 	
 	public static void setName(Window w, String name)
 	{
+		Objects.nonNull(name);
 		w.getProperties().put(PROP_NAME, name);
 	}
 	

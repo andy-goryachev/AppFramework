@@ -1,10 +1,19 @@
 // Copyright © 2024 Andy Goryachev <andy@goryachev.com>
 package goryachev.fx.internal;
+import goryachev.common.log.Log;
+import goryachev.common.util.CList;
 import goryachev.common.util.CSet;
+import goryachev.common.util.GlobalSettings;
+import goryachev.fx.CssLoader;
+import goryachev.fx.FX;
+import goryachev.fx.FxObject;
 import goryachev.fx.FxSettings;
-import java.util.WeakHashMap;
+import java.util.List;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Tooltip;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
@@ -12,9 +21,18 @@ import javafx.stage.Window;
 /**
  * Window Monitor.
  * Remembers the location/size and attributes of windows.
+ * Keeps track of Z order of open windows.
  */
 public class WinMonitor
 {
+	private static final String SEPARATOR = "_";
+	private static final Log log = Log.get("WinMonitor");
+	private static final Object WIN_MONITOR_PROP = new Object();
+	/** in reverse order: top window is last */
+	private static final CList<Window> stack = new CList<>();
+	private final static FxObject<Node> lastFocusOwner = new FxObject<>();
+	static { init(); }
+	
 	private final Window window;
 	private final String id;
 	private double x;
@@ -25,7 +43,6 @@ public class WinMonitor
 	private double yNorm;
 	private double wNorm;
 	private double hNorm;
-	private static final WeakHashMap<Window,WinMonitor> monitors = new WeakHashMap<>(4);
 
 
 	public WinMonitor(Window win, String id)
@@ -43,7 +60,10 @@ public class WinMonitor
 			if(cur != null)
 			{
 				// TODO remove listener!
-				cur.focusOwnerProperty().addListener((s,p,n) -> WindowMgr.updateFocusOwner(n));
+				cur.focusOwnerProperty().addListener((s,p,n) ->
+				{
+					updateFocusOwner(n);
+				});
 			}
 		});
 		
@@ -51,7 +71,7 @@ public class WinMonitor
 		{
 			if(cur)
 			{
-				WindowMgr.updateFocusOwner(win);
+				updateFocusedWindow(win);
 			}
 		});
 
@@ -78,7 +98,7 @@ public class WinMonitor
 			hNorm = h;
 			h = win.getHeight();
 		});
-
+		
 		if(win instanceof Stage s)
 		{
 			s.iconifiedProperty().addListener((p) ->
@@ -113,38 +133,91 @@ public class WinMonitor
 	}
 	
 	
+	private static void init()
+	{
+		FX.addChangeListener(Window.getWindows(), (ch) ->
+		{
+			while(ch.next())
+			{
+				if(ch.wasAdded())
+				{
+					for(Window w: ch.getAddedSubList())
+					{
+						log.debug("added: %s", w);
+						// window is already showing
+						FxSchema.restoreWindow(w);
+						applyStyleSheet(w);
+					}
+				}
+				else if(ch.wasRemoved())
+				{
+					for(Window w: ch.getRemoved())
+					{
+						log.debug("removed: %s", w);
+						// the only problem here is that window is already hidden - does it matter?
+						// if it does, need to listen to WindowEvent.WINDOW_HIDING event
+						FxSchema.storeWindow(w);
+						stack.remove(w);
+					}
+					
+					GlobalSettings.save();
+				}
+			}
+		});
+		stack.addAll(Window.getWindows());
+	}
+	
+	
+	public Window getWindow()
+	{
+		return window;
+	}
+	
+	
 	public String getID()
 	{
 		return id;
 	}
 
 
-	private static String createID(Window win)
+	private static String createID(Window win, String useID)
 	{
 		String name = FxSettings.getName(win);
 		if(name != null)
 		{
+			// collect existing ids
 			CSet<String> ids = new CSet<>();
 			for(Window w: Window.getWindows())
 			{
 				if(w != win)
 				{
-					WinMonitor m = monitors.get(w);
-					if(m == null)
+					WinMonitor m = get(w);
+					if(m != null)
 					{
-						return null;
-					}
-					String id = m.getID();
-					if(id.startsWith(name))
-					{
-						ids.add(id);
+						String id = m.getID();
+						if(id.startsWith(name))
+						{
+							ids.add(id);
+						}
 					}
 				}
+			}
+			
+			if(useID != null)
+			{
+				// check if this combination does not exist already
+				String id = name + SEPARATOR + useID;
+				if(ids.contains(id))
+				{
+					// this should not happen if FxSettings.openLayout() is called once at the launch
+					throw new Error("duplicate id:" + id);
+				}
+				return id;
 			}
 
 			for(int i=0; i<200_000; i++)
 			{
-				String id = name + "_" + i;
+				String id = name + SEPARATOR + i;
 				if(!ids.contains(id))
 				{
 					return id;
@@ -153,28 +226,72 @@ public class WinMonitor
 		}
 		return null;
 	}
-
-
+	
+	
+	/** strips the window name and the separator, returning the id part only */
+	public String getIDPart()
+	{
+		int ix = id.lastIndexOf(SEPARATOR);
+		if(ix < 0)
+		{
+			throw new Error("no id: " + id);
+		}
+		return id.substring(ix + 1);
+	}
+	
+	
 	public static WinMonitor forWindow(Window w)
+	{
+		return forWindow(w, null);
+	}
+
+
+	public static WinMonitor forWindow(Window w, String useID)
 	{
 		if(w != null)
 		{
-			WinMonitor m = monitors.get(w);
+			if(w instanceof Tooltip)
+			{
+				return null;
+			}
+			else if(w instanceof ContextMenu)
+			{
+				return null;
+			}
+			
+			WinMonitor m = get(w);
 			if(m == null)
 			{
-				String id = createID(w);
+				String id = createID(w, useID);
 				if(id != null)
 				{
 					m = new WinMonitor(w, id);
-					monitors.put(w, m);
+					set(w, m);
 				}
 			}
 			return m;
 		}
 		return null;
 	}
+	
+	
+	private static WinMonitor get(Window w)
+	{
+		Object x = w.getProperties().get(WIN_MONITOR_PROP);
+		if(x instanceof WinMonitor m)
+		{
+			return m;
+		}
+		return null;
+	}
 
+	
+	private static void set(Window w, WinMonitor m)
+	{
+		w.getProperties().put(WIN_MONITOR_PROP, m);
+	}
 
+	
 	public static WinMonitor forNode(Node n)
 	{
 		Scene s = n.getScene();
@@ -212,4 +329,58 @@ public class WinMonitor
 	{
 		return h;
 	}
+	
+	
+	private static void applyStyleSheet(Window w)
+	{
+		try
+		{
+			String style = CssLoader.getCurrentStyleSheet();
+			FX.applyStyleSheet(w, null, style);
+		}
+		catch(Throwable e)
+		{
+			log.error(e);
+		}
+	}
+	
+
+	/**
+	 * returns the list of windows in the reverse order - the top window is last.
+	 */
+	public static List<Window> getWindowStack()
+	{
+		return new CList<>(stack);
+	}
+	
+	
+	private static void updateFocusedWindow(Window w)
+	{
+		log.debug(w);
+		stack.remove(w);
+		stack.add(w);
+	}
+	
+	
+	private static void updateFocusOwner(Node n)
+	{
+		if(n != null)
+		{
+			log.debug(n);
+			lastFocusOwner.set(n);
+		}
+	}
+	
+	
+	public static Node getLastFocusOwner()
+	{
+		return lastFocusOwner.get();
+	}
+	
+	
+	public static ReadOnlyObjectProperty<Node> lastFocusOwnerProperty()
+	{
+		return lastFocusOwner.getReadOnlyProperty();
+	}
+
 }

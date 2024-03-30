@@ -7,6 +7,9 @@ import goryachev.fx.CPane;
 import goryachev.fx.FX;
 import goryachev.fx.FxDialog;
 import goryachev.fx.FxSettings;
+import goryachev.fx.FxWindow;
+import java.util.List;
+import java.util.function.Function;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -52,8 +55,7 @@ public class FxSchema
 {
 	private static final String FX_PREFIX = "FX.";
 	
-	static final String WINDOWS = FX_PREFIX + ".WINDOWS";
-	
+	private static final String SFX_WINDOWS = "WINDOWS";
 	private static final String SFX_COLUMNS = ".COLS";
 	private static final String SFX_DIVIDERS = ".DIVS";
 	private static final String SFX_EXPANDED = ".EXP";
@@ -517,7 +519,7 @@ public class FxSchema
 
 	@Deprecated // FIX remove
 	// replace with binding properties to LocalSettings
-	public static void setOnSettingsLoaded(Node n, Runnable r)
+	private static void setOnSettingsLoaded(Node n, Runnable r)
 	{
 		n.getProperties().put(PROP_LOAD_HANDLER, r);
 	}
@@ -800,5 +802,78 @@ public class FxSchema
 		p.setExpanded(expanded);		
 
 		restoreNode(p.getContent());
+	}
+	
+	
+	/**
+	 * Opens all previously opened windows using the specified generator.
+	 * Open a default window when no windows has been opened from the settings.
+	 */
+	public static <W extends FxWindow> int openLayout(Function<String,W> generator)
+	{
+		// ensure WinMonitor is initialized 
+		WinMonitor.forWindow(null);
+		
+		// numEntries,name,id,... in reverse order 
+		SStream st = GlobalSettings.getStream(FX_PREFIX + SFX_WINDOWS);
+		int count = 0;
+
+		int numEntries = st.nextInt(-1);
+		if(numEntries > 0)
+		{
+			for(int i=0; i<numEntries; i++)
+			{
+				String name = st.nextString();
+				String id = st.nextString();
+				FxWindow w = generator.apply(name);
+				if(w != null)
+				{
+					// ensure that the window monitor is created with the right id
+					WinMonitor.forWindow(w, id);
+
+					if(!w.isShowing())
+					{
+						w.open();
+					}
+					
+					count++;
+				}
+			}
+		}
+		
+		if(count == 0)
+		{
+			FxWindow w = generator.apply(null);
+			w.open();
+			count++;
+		}
+		
+		return count;
+	}
+	
+	
+	public static void storeLayout()
+	{
+		SStream ss = new SStream();
+		List<Window> ws = WinMonitor.getWindowStack();
+		
+		int sz = ws.size();
+		ss.add(sz);
+		
+		for(int i=0; i<sz; i++)
+		{
+			Window w = ws.get(i);
+			FxSettings.store(w);
+			
+			String name = FxSettings.getName(w);
+			String id = WinMonitor.forWindow(w).getIDPart();
+			
+			ss.add(name);
+			ss.add(id);
+		}
+		
+		GlobalSettings.setStream(FX_PREFIX + SFX_WINDOWS, ss);
+		
+		GlobalSettings.save();		
 	}
 }

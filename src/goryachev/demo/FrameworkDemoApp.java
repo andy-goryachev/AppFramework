@@ -18,7 +18,7 @@ public class FrameworkDemoApp extends Application
 	{
 		// init logging
 		Log.initConsoleForDebug();
-		Log.getRoot().info();
+		Log.getRoot().debug();
 
 		Application.launch(FrameworkDemoApp.class, args);
 	}
@@ -38,7 +38,18 @@ public class FrameworkDemoApp extends Application
 
 		// create/load data and open the main window
 		DemoData d = new DemoData();
-		MainWindow w = new MainWindow(d);
-		w.open();
+		
+		// support multiple windows
+		FxSettings.openLayout((name) ->
+		{
+			if(SecondaryWindow.NAME.equals(name))
+			{
+				return new SecondaryWindow();
+			}
+			else
+			{
+				return new MainWindow(d);
+			}
+		});
 	}
 }

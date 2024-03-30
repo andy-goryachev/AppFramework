@@ -102,7 +102,8 @@ public class MainWindow extends FxWindow
 		m.item("Paste");
 		// window
 		m.menu("Window");
-		m.item("New Window", this::newWindow);
+		m.item("+New Window", this::newWindow);
+		m.item("Secondary Window", this::newSecondaryWindow);
 		// help
 		m.menu("Help");
 		m.item("About");
@@ -154,5 +155,11 @@ public class MainWindow extends FxWindow
 	protected void newWindow()
 	{
 		new MainWindow(data).open();
+	}
+	
+	
+	protected void newSecondaryWindow()
+	{
+		new SecondaryWindow().open();
 	}
 }

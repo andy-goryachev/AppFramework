@@ -129,20 +129,6 @@ public final class FX
 	}
 	
 	
-	/** 
-	 * loads application windows stored in the global settings.  
-	 * A window of specified defaultWindowType is created when the layout does not contain any windows saved,
-	 * or when no window of the defaultWindowType was created.
-	 * Generator:
-	 * - for null argument (default window id) must return a non-null instance 
-	 * - may return null window for a non-null window id
-	 */ 
-	public static void openWindows(Function<String,FxWindow> generator, Class<? extends FxWindow> defaultWindowType)
-	{
-		WindowMgr.openWindows(generator, defaultWindowType);
-	}
-	
-	
 	public static void exit()
 	{
 		WindowMgr.exit();
@@ -724,9 +710,9 @@ public final class FX
 	 * setting null clears the handler 
 	 */
 	@Deprecated // FIX remove
-	public static void setOnSettingsLoaded(Node n, Runnable r)
+	private static void setOnSettingsLoaded(Node n, Runnable r)
 	{
-		FxSchema.setOnSettingsLoaded(n, r);
+		//FxSchema.setOnSettingsLoaded(n, r);
 	}
 	
 	
@@ -956,12 +942,6 @@ public final class FX
 			return (Tooltip)n.getProperties().get(PROP_TOOLTIP);
 		}
 		return null;
-	}
-	
-	
-	public static void storeSettings()
-	{
-		WindowMgr.storeSettings();
 	}
 	
 	
