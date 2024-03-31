@@ -90,7 +90,7 @@ public class FxSettings
 	public static void restore(Window w)
 	{
 		FxSchema.restoreWindow(w);
-		GlobalSettings.save();
+		//GlobalSettings.save();
 	}
 
 	
@@ -141,5 +141,11 @@ public class FxSettings
 			return s;
 		}
 		return null;
+	}
+	
+	
+	public static void save()
+	{
+		GlobalSettings.save();
 	}
 }
