@@ -2,8 +2,10 @@
 package goryachev.demo;
 import goryachev.common.log.Log;
 import goryachev.common.util.CPlatform;
+import goryachev.common.util.GlobalSettings;
 import goryachev.fx.CssLoader;
 import goryachev.fx.FxSettings;
+import goryachev.fx.internal.FxSettingsSchema;
 import java.io.File;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -40,7 +42,8 @@ public class FrameworkDemoApp extends Application
 		DemoData d = new DemoData();
 		
 		// support multiple windows
-		FxSettings.openLayout((name) ->
+		FxSettingsSchema schema = new FxSettingsSchema(GlobalSettings.instance());
+		FxSettings.openLayout(schema, (name) ->
 		{
 			if(SecondaryWindow.NAME.equals(name))
 			{

@@ -1,6 +1,5 @@
 // Copyright © 2016-2024 Andy Goryachev <andy@goryachev.com>
 package goryachev.fx.internal;
-import goryachev.common.util.GlobalSettings;
 import goryachev.common.util.SB;
 import goryachev.common.util.SStream;
 import goryachev.fx.CPane;
@@ -8,6 +7,7 @@ import goryachev.fx.FX;
 import goryachev.fx.FxDialog;
 import goryachev.fx.FxSettings;
 import goryachev.fx.FxWindow;
+import goryachev.fx.ISettingsSchema;
 import java.util.List;
 import java.util.function.Function;
 import javafx.beans.value.ChangeListener;
@@ -49,9 +49,10 @@ import javafx.stage.Window;
 
 
 /**
- * Keys and functions used to store the user preferences.
+ * Stores and restores the UI state.
  */
 public class FxSettingsSchema
+	implements ISettingsSchema
 {
 	private static final String FX_PREFIX = "FX.";
 	
@@ -75,8 +76,16 @@ public class FxSettingsSchema
 	private static final Object PROP_LOAD_HANDLER = new Object();
 	private static final Object PROP_SKIP_SETTINGS = new Object();
 	
+	private final ASettingsStore store;
 	
-	public static void storeWindow(Window win)
+	
+	public FxSettingsSchema(ASettingsStore store)
+	{
+		this.store = store;
+	}
+	
+	
+	public void storeWindow(Window win)
 	{
 		WinMonitor m = WinMonitor.forWindow(win);
 		if(m != null)
@@ -112,7 +121,7 @@ public class FxSettingsSchema
 				}
 			}
 
-			GlobalSettings.setStream(FX_PREFIX + m.getID(), ss);
+			store.setStream(FX_PREFIX + m.getID(), ss);
 			
 			Node n = win.getScene().getRoot();
             storeNode(n);
@@ -120,7 +129,7 @@ public class FxSettingsSchema
 	}
 	
 	
-	public static void restoreWindow(Window win)
+	public void restoreWindow(Window win)
 	{
 		if(win instanceof PopupWindow)
 		{
@@ -137,7 +146,7 @@ public class FxSettingsSchema
 		WinMonitor m = WinMonitor.forWindow(win);
 		if(m != null)
 		{
-			SStream ss = GlobalSettings.getStream(FX_PREFIX + m.getID());
+			SStream ss = store.getStream(FX_PREFIX + m.getID());
 			if(ss != null)
 			{
 				double x = ss.nextDouble(-1);
@@ -205,7 +214,7 @@ public class FxSettingsSchema
 	}
 
 
-	public static void storeNode(Node n)
+	public void storeNode(Node n)
 	{
 		if(n == null)
 		{
@@ -275,7 +284,7 @@ public class FxSettingsSchema
 	}
 	
 	
-	public static void restoreNode(Node n)
+	public void restoreNode(Node n)
 	{
 		if(n == null)
 		{
@@ -357,7 +366,7 @@ public class FxSettingsSchema
 	}
 	
 
-	private static boolean handleNullScene(Node node)
+	protected boolean handleNullScene(Node node)
 	{
 		if(node == null)
 		{
@@ -386,7 +395,7 @@ public class FxSettingsSchema
 	}
 
 
-	private static String computeName(Node n)
+	protected String computeName(Node n)
 	{
 		WinMonitor m = WinMonitor.forNode(n);
 		if(m != null)
@@ -403,7 +412,7 @@ public class FxSettingsSchema
 
 
 	// returns false if Node should be ignored
-	private static boolean collectNames(SB sb, Node n)
+	protected boolean collectNames(SB sb, Node n)
 	{
 		if(n instanceof MenuBar)
 		{
@@ -439,7 +448,7 @@ public class FxSettingsSchema
 	}
 
 
-	private static String getNodeName(Node n)
+	protected String getNodeName(Node n)
 	{
 		if(n != null)
 		{
@@ -550,16 +559,16 @@ public class FxSettingsSchema
 	}
 
 
-	private static void storeCheckBox(CheckBox n, String name)
+	protected void storeCheckBox(CheckBox n, String name)
 	{
 		boolean sel = n.isSelected();
-		GlobalSettings.setBoolean(FX_PREFIX + name, sel);
+		store.setBoolean(FX_PREFIX + name, sel);
 	}
 
 
-	private static void restoreCheckBox(CheckBox n, String name)
+	protected void restoreCheckBox(CheckBox n, String name)
 	{
-		Boolean sel = GlobalSettings.getBoolean(FX_PREFIX + name);
+		Boolean sel = store.getBoolean(FX_PREFIX + name);
 		if(sel != null)
 		{
 			n.setSelected(sel);
@@ -567,24 +576,24 @@ public class FxSettingsSchema
 	}
 
 
-	private static void storeComboBox(ComboBox n, String name)
+	protected void storeComboBox(ComboBox n, String name)
 	{
 		if(n.getSelectionModel() != null)
 		{
 			int ix = n.getSelectionModel().getSelectedIndex();
 			if(ix >= 0)
 			{
-				GlobalSettings.setInt(FX_PREFIX + name, ix);
+				store.setInt(FX_PREFIX + name, ix);
 			}
 		}
 	}
 
 
-	private static void restoreComboBox(ComboBox n, String name)
+	protected void restoreComboBox(ComboBox n, String name)
 	{
 		if(n.getSelectionModel() != null)
 		{
-			int ix = GlobalSettings.getInt(FX_PREFIX + name, -1);
+			int ix = store.getInt(FX_PREFIX + name, -1);
 			if((ix >= 0) && (ix < n.getItems().size()))
 			{
 				n.getSelectionModel().select(ix);
@@ -593,24 +602,24 @@ public class FxSettingsSchema
 	}
 
 
-	private static void storeListView(ListView n, String name)
+	protected void storeListView(ListView n, String name)
 	{
 		if(n.getSelectionModel() != null)
 		{
 			int ix = n.getSelectionModel().getSelectedIndex();
 			if(ix >= 0)
 			{
-				GlobalSettings.setInt(FX_PREFIX + name, ix);
+				store.setInt(FX_PREFIX + name, ix);
 			}
 		}
 	}
 
 
-	private static void restoreListView(ListView n, String name)
+	protected void restoreListView(ListView n, String name)
 	{
 		if(n.getSelectionModel() != null)
 		{
-			int ix = GlobalSettings.getInt(FX_PREFIX + name, -1);
+			int ix = store.getInt(FX_PREFIX + name, -1);
 			if((ix >= 0) && (ix < n.getItems().size()))
 			{
 				n.getSelectionModel().select(ix);
@@ -619,13 +628,13 @@ public class FxSettingsSchema
 	}
 
 
-	private static void storeSplitPane(SplitPane sp, String name)
+	protected void storeSplitPane(SplitPane sp, String name)
 	{
 		double[] div = sp.getDividerPositions();
 		SStream ss = new SStream();
 		ss.add(div.length);
 		ss.addAll(div);
-		GlobalSettings.setStream(FX_PREFIX + name + SFX_DIVIDERS, ss);
+		store.setStream(FX_PREFIX + name + SFX_DIVIDERS, ss);
 
 		for(Node ch: sp.getItems())
 		{
@@ -634,9 +643,9 @@ public class FxSettingsSchema
 	}
 	
 
-	private static void restoreSplitPane(SplitPane sp, String name)
+	protected void restoreSplitPane(SplitPane sp, String name)
 	{
-		SStream ss = GlobalSettings.getStream(FX_PREFIX + name + SFX_DIVIDERS);
+		SStream ss = store.getStream(FX_PREFIX + name + SFX_DIVIDERS);
 		if(ss != null)
 		{
 			int sz = ss.nextInt(-1);
@@ -669,7 +678,7 @@ public class FxSettingsSchema
 	}
 	
 	
-	private static void storeTableView(TableView t, String name)
+	protected void storeTableView(TableView t, String name)
 	{
 		ObservableList<TableColumn<?,?>> cs = t.getColumns();
 		int sz = cs.size();
@@ -701,23 +710,23 @@ public class FxSettingsSchema
 			s.add(c.getWidth());
 			s.add(sortOrder);
 		}
-		GlobalSettings.setStream(FX_PREFIX + name + SFX_COLUMNS, s);
+		store.setStream(FX_PREFIX + name + SFX_COLUMNS, s);
 		
 		// selection
 		int ix = t.getSelectionModel().getSelectedIndex();
 		if(ix >= 0)
 		{
-			GlobalSettings.setInt(FX_PREFIX + name + SFX_SELECTION, ix);
+			store.setInt(FX_PREFIX + name + SFX_SELECTION, ix);
 		}
 	}
 	
 	
-	private static void restoreTableView(TableView t, String name)
+	protected void restoreTableView(TableView t, String name)
 	{
 		ObservableList<TableColumn<?,?>> cs = t.getColumns();
 		
 		// columns
-		SStream ss = GlobalSettings.getStream(FX_PREFIX + name + SFX_COLUMNS);
+		SStream ss = store.getStream(FX_PREFIX + name + SFX_COLUMNS);
 		if(ss != null)
 		{
 			int sz = ss.nextInt();
@@ -736,7 +745,7 @@ public class FxSettingsSchema
 			}
 		}
 		
-		int ix = GlobalSettings.getInt(FX_PREFIX + name + SFX_SELECTION, -1);
+		int ix = store.getInt(FX_PREFIX + name + SFX_SELECTION, -1);
 		if(ix >= 0)
 		{
 			// TODO
@@ -744,11 +753,11 @@ public class FxSettingsSchema
 	}
 
 
-	private static void storeTabPane(TabPane p, String name)
+	protected void storeTabPane(TabPane p, String name)
 	{
 		// selection
 		int ix = p.getSelectionModel().getSelectedIndex();
-		GlobalSettings.setInt(FX_PREFIX + name + SFX_SELECTION, ix);
+		store.setInt(FX_PREFIX + name + SFX_SELECTION, ix);
 
 		// content
 		var sm = p.getSelectionModel();
@@ -763,10 +772,10 @@ public class FxSettingsSchema
 	}
 
 
-	private static void restoreTabPane(TabPane p, String name)
+	protected void restoreTabPane(TabPane p, String name)
 	{
 		// selection
-		int ix = GlobalSettings.getInt(FX_PREFIX + name + SFX_SELECTION, -1);
+		int ix = store.getInt(FX_PREFIX + name + SFX_SELECTION, -1);
 		if(ix >= 0)
 		{
 			if(ix < p.getTabs().size())
@@ -788,17 +797,17 @@ public class FxSettingsSchema
 	}
 	
 	
-	private static void storeTitledPane(TitledPane p, String name)
+	protected void storeTitledPane(TitledPane p, String name)
 	{
-		GlobalSettings.setBoolean(FX_PREFIX + name + SFX_EXPANDED, p.isExpanded());
+		store.setBoolean(FX_PREFIX + name + SFX_EXPANDED, p.isExpanded());
 		
 		storeNode(p.getContent());
 	}
 	
 	
-	private static void restoreTitledPane(TitledPane p, String name)
+	protected void restoreTitledPane(TitledPane p, String name)
 	{
-		boolean expanded = GlobalSettings.getBoolean(FX_PREFIX + name + SFX_EXPANDED, true);
+		boolean expanded = store.getBoolean(FX_PREFIX + name + SFX_EXPANDED, true);
 		p.setExpanded(expanded);		
 
 		restoreNode(p.getContent());
@@ -809,13 +818,13 @@ public class FxSettingsSchema
 	 * Opens all previously opened windows using the specified generator.
 	 * Open a default window when no windows has been opened from the settings.
 	 */
-	public static <W extends FxWindow> int openLayout(Function<String,W> generator)
+	public <W extends FxWindow> int openLayout(Function<String,W> generator)
 	{
 		// ensure WinMonitor is initialized 
 		WinMonitor.forWindow(null);
 		
 		// numEntries,name,id,... in reverse order 
-		SStream st = GlobalSettings.getStream(FX_PREFIX + SFX_WINDOWS);
+		SStream st = store.getStream(FX_PREFIX + SFX_WINDOWS);
 		int count = 0;
 
 		int numEntries = st.nextInt(-1);
@@ -852,7 +861,7 @@ public class FxSettingsSchema
 	}
 	
 	
-	public static void storeLayout()
+	public void storeLayout()
 	{
 		SStream ss = new SStream();
 		List<Window> ws = WinMonitor.getWindowStack();
@@ -871,9 +880,15 @@ public class FxSettingsSchema
 			ss.add(name);
 			ss.add(id);
 		}
-		
-		GlobalSettings.setStream(FX_PREFIX + SFX_WINDOWS, ss);
-		
-		GlobalSettings.save();		
+
+		store.setStream(FX_PREFIX + SFX_WINDOWS, ss);
+
+		store.save();
+	}
+
+
+	public void save()
+	{
+		store.save();
 	}
 }

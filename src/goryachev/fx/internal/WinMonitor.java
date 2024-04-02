@@ -145,7 +145,7 @@ public class WinMonitor
 					{
 						log.debug("added: %s", w);
 						// window is already showing
-						FxSettingsSchema.restoreWindow(w);
+						FxSettings.restore(w);
 						applyStyleSheet(w);
 					}
 				}
@@ -156,7 +156,7 @@ public class WinMonitor
 						log.debug("removed: %s", w);
 						// the only problem here is that window is already hidden - does it matter?
 						// if it does, need to listen to WindowEvent.WINDOW_HIDING event
-						FxSettingsSchema.storeWindow(w);
+						FxSettings.store(w);
 						stack.remove(w);
 					}
 					

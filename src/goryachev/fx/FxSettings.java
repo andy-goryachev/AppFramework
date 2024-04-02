@@ -3,7 +3,7 @@ package goryachev.fx;
 import goryachev.common.util.FileSettingsProvider;
 import goryachev.common.util.GlobalSettings;
 import goryachev.common.util.GlobalSettingsProvider;
-import goryachev.fx.internal.FxSettingsSchema;
+import goryachev.fx.internal.ASettingsStore;
 import java.io.File;
 import java.util.Objects;
 import java.util.function.Function;
@@ -20,6 +20,7 @@ import javafx.stage.Window;
 public class FxSettings
 {
 	private static final Object PROP_NAME = new Object();
+	private static ISettingsSchema schema;
 
 
 	/**
@@ -49,15 +50,24 @@ public class FxSettings
 	 * The generator must return a default window when supplied with a null name.
 	 * To ensure the right settings are loaded, the newly created window must remain hidden. 
 	 */ 
-	public static <W extends FxWindow> int openLayout(Function<String,W> generator)
+	public static <W extends FxWindow> int openLayout(ISettingsSchema s, Function<String,W> generator)
 	{
-		return FxSettingsSchema.openLayout(generator);
+		if(schema == null)
+		{
+			schema = s;
+		}
+		else if(schema != s)
+		{
+			throw new Error("schema already set");
+		}
+
+		return schema.openLayout(generator);
 	}
 	
 	
-	public static void saveLayout()
+	public static void storeLayout()
 	{
-		FxSettingsSchema.storeLayout();
+		schema.storeLayout();
 	}
 	
 	
@@ -65,8 +75,8 @@ public class FxSettings
 	{
 		if(n != null)
 		{
-			FxSettingsSchema.storeNode(n);
-			GlobalSettings.save();
+			schema.storeNode(n);
+			schema.save();
 		}
 	}
 	
@@ -75,22 +85,21 @@ public class FxSettings
 	{
 		if(n != null)
 		{
-			FxSettingsSchema.restoreNode(n);
+			schema.restoreNode(n);
 		}
 	}
 	
 	
 	public static void store(Window w)
 	{
-		FxSettingsSchema.storeWindow(w);
-		GlobalSettings.save();
+		schema.storeWindow(w);
+		schema.save();
 	}
 	
 	
 	public static void restore(Window w)
 	{
-		FxSettingsSchema.restoreWindow(w);
-		//GlobalSettings.save();
+		schema.restoreWindow(w);
 	}
 
 	

@@ -2,6 +2,7 @@
 package goryachev.fx.internal;
 import goryachev.common.log.Log;
 import goryachev.fx.FxAction;
+import goryachev.fx.FxSettings;
 import goryachev.fx.FxWindow;
 import goryachev.fx.OnWindowClosing;
 import javafx.application.Platform;
@@ -115,7 +116,7 @@ public class WindowMgr
 	
 	public static void exit()
 	{
-		FxSettingsSchema.storeLayout();
+		FxSettings.storeLayout();
 		
 		if(confirmExit())
 		{
