@@ -8,7 +8,7 @@ import goryachev.common.util.IDisconnectable;
 import goryachev.common.util.SystemTask;
 import goryachev.fx.internal.CssTools;
 import goryachev.fx.internal.DisconnectableIntegerListener;
-import goryachev.fx.internal.FxSchema;
+import goryachev.fx.internal.FxSettingsSchema;
 import goryachev.fx.internal.FxStyleHandler;
 import goryachev.fx.internal.ParentWindow;
 import goryachev.fx.internal.WindowMgr;
@@ -124,7 +124,7 @@ public final class FX
 	{
 		if(n != null)
 		{
-			FxSchema.setSkipSettings(n);
+			FxSettingsSchema.setSkipSettings(n);
 		}
 	}
 	

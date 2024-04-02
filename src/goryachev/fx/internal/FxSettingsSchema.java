@@ -51,7 +51,7 @@ import javafx.stage.Window;
 /**
  * Keys and functions used to store the user preferences.
  */
-public class FxSchema
+public class FxSettingsSchema
 {
 	private static final String FX_PREFIX = "FX.";
 	

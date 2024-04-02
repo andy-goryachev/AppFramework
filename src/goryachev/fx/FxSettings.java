@@ -3,7 +3,7 @@ package goryachev.fx;
 import goryachev.common.util.FileSettingsProvider;
 import goryachev.common.util.GlobalSettings;
 import goryachev.common.util.GlobalSettingsProvider;
-import goryachev.fx.internal.FxSchema;
+import goryachev.fx.internal.FxSettingsSchema;
 import java.io.File;
 import java.util.Objects;
 import java.util.function.Function;
@@ -51,13 +51,13 @@ public class FxSettings
 	 */ 
 	public static <W extends FxWindow> int openLayout(Function<String,W> generator)
 	{
-		return FxSchema.openLayout(generator);
+		return FxSettingsSchema.openLayout(generator);
 	}
 	
 	
 	public static void saveLayout()
 	{
-		FxSchema.storeLayout();
+		FxSettingsSchema.storeLayout();
 	}
 	
 	
@@ -65,7 +65,7 @@ public class FxSettings
 	{
 		if(n != null)
 		{
-			FxSchema.storeNode(n);
+			FxSettingsSchema.storeNode(n);
 			GlobalSettings.save();
 		}
 	}
@@ -75,21 +75,21 @@ public class FxSettings
 	{
 		if(n != null)
 		{
-			FxSchema.restoreNode(n);
+			FxSettingsSchema.restoreNode(n);
 		}
 	}
 	
 	
 	public static void store(Window w)
 	{
-		FxSchema.storeWindow(w);
+		FxSettingsSchema.storeWindow(w);
 		GlobalSettings.save();
 	}
 	
 	
 	public static void restore(Window w)
 	{
-		FxSchema.restoreWindow(w);
+		FxSettingsSchema.restoreWindow(w);
 		//GlobalSettings.save();
 	}
 

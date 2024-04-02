@@ -115,7 +115,7 @@ public class WindowMgr
 	
 	public static void exit()
 	{
-		FxSchema.storeLayout();
+		FxSettingsSchema.storeLayout();
 		
 		if(confirmExit())
 		{
