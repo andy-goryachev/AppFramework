@@ -8,16 +8,16 @@ import goryachev.common.util.IDisconnectable;
 import goryachev.common.util.SystemTask;
 import goryachev.fx.internal.CssTools;
 import goryachev.fx.internal.DisconnectableIntegerListener;
-import goryachev.fx.internal.FxSettingsSchema;
 import goryachev.fx.internal.FxStyleHandler;
 import goryachev.fx.internal.ParentWindow;
-import goryachev.fx.internal.WindowMgr;
+import goryachev.fx.settings.FxSettingsSchema;
 import goryachev.fx.table.FxTable;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.function.Consumer;
@@ -99,7 +99,11 @@ public final class FX
 	public static final double ONE_OVER_GAMMA = 1.0 / GAMMA;
 	private static Text helper;
 	private static final Object PROP_TOOLTIP = new Object();
-
+	
+	// TODO move both to FxSettings?
+	private static final Object PROP_NAME = new Object();
+	private static final Object PROP_SKIP_SETTINGS = new Object();
+	
 	
 	public static FxWindow getWindow(Node n)
 	{
@@ -122,24 +126,29 @@ public final class FX
 	 */
 	public static void setSkipSettings(Node n)
 	{
-		if(n != null)
-		{
-			FxSettingsSchema.setSkipSettings(n);
-		}
+		n.getProperties().put(PROP_SKIP_SETTINGS, Boolean.TRUE);
 	}
 	
 	
-	public static void exit()
+	public static boolean isSkipSettings(Node n)
 	{
-		WindowMgr.exit();
+		Object x = n.getProperties().get(PROP_SKIP_SETTINGS);
+		return Boolean.TRUE.equals(x);
 	}
 	
 	
-	public static FxAction exitAction()
+	public static void setSkipSettings(Window w)
 	{
-		return WindowMgr.exitAction();
+		w.getProperties().put(PROP_SKIP_SETTINGS, Boolean.TRUE);
 	}
 	
+	
+	public static boolean isSkipSettings(Window w)
+	{
+		Object x = w.getProperties().get(PROP_SKIP_SETTINGS);
+		return Boolean.TRUE.equals(x);
+	}
+
 	
 	/** creates a label.  accepts: CssStyle, CssID, FxCtl, Insets, OverrunStyle, Pos, TextAlignment, Color, Node, Background */
 	public static Label label(Object ... attrs)
@@ -152,17 +161,17 @@ public final class FX
 			{
 				// ignore
 			}
-			else if(a instanceof CssStyle)
+			else if(a instanceof CssStyle v)
 			{
-				n.getStyleClass().add(((CssStyle)a).getName());
+				n.getStyleClass().add(v.getName());
 			}
-			else if(a instanceof CssID)
+			else if(a instanceof CssID v)
 			{
-				n.setId(((CssID)a).getID());
+				n.setId(v.getID());
 			}
-			else if(a instanceof FxCtl)
+			else if(a instanceof FxCtl v)
 			{
-				switch((FxCtl)a)
+				switch(v)
 				{
 				case BOLD:
 					n.getStyleClass().add(CssTools.BOLD.getName());
@@ -186,44 +195,44 @@ public final class FX
 					n.setWrapText(true);
 					break;
 				default:
-					throw new Error("?" + a);
+					throw new Error("?" + v);
 				}
 			}
-			else if(a instanceof Insets)
+			else if(a instanceof Insets v)
 			{
-				n.setPadding((Insets)a);
+				n.setPadding(v);
 			}
-			else if(a instanceof OverrunStyle)
+			else if(a instanceof OverrunStyle v)
 			{
-				n.setTextOverrun((OverrunStyle)a);
+				n.setTextOverrun(v);
 			}
-			else if(a instanceof Pos)
+			else if(a instanceof Pos v)
 			{
-				n.setAlignment((Pos)a);
+				n.setAlignment(v);
 			}
-			else if(a instanceof String)
+			else if(a instanceof String s)
 			{
-				n.setText((String)a);
+				n.setText(s);
 			}
-			else if(a instanceof TextAlignment)
+			else if(a instanceof TextAlignment v)
 			{
-				n.setTextAlignment((TextAlignment)a);
+				n.setTextAlignment(v);
 			}
-			else if(a instanceof Color)
+			else if(a instanceof Color v)
 			{
-				n.setTextFill((Color)a);
+				n.setTextFill(v);
 			}
-			else if(a instanceof StringProperty)
+			else if(a instanceof StringProperty v)
 			{
-				n.textProperty().bind((StringProperty)a);
+				n.textProperty().bind(v);
 			}
-			else if(a instanceof Node)
+			else if(a instanceof Node v)
 			{
-				n.setGraphic((Node)a);
+				n.setGraphic(v);
 			}
-			else if(a instanceof Background)
+			else if(a instanceof Background v)
 			{
-				n.setBackground((Background)a);
+				n.setBackground(v);
 			}
 			else
 			{
@@ -246,17 +255,17 @@ public final class FX
 			{
 				// ignore
 			}
-			else if(a instanceof CssStyle)
+			else if(a instanceof CssStyle v)
 			{
-				n.getStyleClass().add(((CssStyle)a).getName());
+				n.getStyleClass().add(v.getName());
 			}
-			else if(a instanceof CssID)
+			else if(a instanceof CssID v)
 			{
-				n.setId(((CssID)a).getID());
+				n.setId(v.getID());
 			}
-			else if(a instanceof FxCtl)
+			else if(a instanceof FxCtl v)
 			{
-				switch((FxCtl)a)
+				switch(v)
 				{
 				case BOLD:
 					n.getStyleClass().add(CssTools.BOLD.getName());
@@ -268,16 +277,16 @@ public final class FX
 					n.setFocusTraversable(false);
 					break;
 				default:
-					throw new Error("?" + a);
+					throw new Error("?" + v);
 				}
 			}
-			else if(a instanceof String)
+			else if(a instanceof String s)
 			{
-				n.setText((String)a);
+				n.setText(s);
 			}
-			else if(a instanceof TextAlignment)
+			else if(a instanceof TextAlignment v)
 			{
-				n.setTextAlignment((TextAlignment)a);
+				n.setTextAlignment(v);
 			}
 			else
 			{
@@ -345,17 +354,17 @@ public final class FX
 				{
 					// ignore
 				}
-				else if(a instanceof CssStyle)
+				else if(a instanceof CssStyle v)
 				{
-					n.getStyleClass().add(((CssStyle)a).getName());
+					n.getStyleClass().add(v.getName());
 				}
-				else if(a instanceof CssID)
+				else if(a instanceof CssID v)
 				{
-					n.setId(((CssID)a).getID());
+					n.setId(v.getID());
 				}
-				else if(a instanceof FxCtl)
+				else if(a instanceof FxCtl v)
 				{
-					switch((FxCtl)a)
+					switch(v)
 					{
 					case BOLD:
 						n.getStyleClass().add(CssTools.BOLD.getName());
@@ -379,13 +388,13 @@ public final class FX
 						n.setFocusTraversable(false);
 						break;
 					case WRAP_TEXT:
-						if(n instanceof Labeled)
+						if(n instanceof Labeled c)
 						{
-							((Labeled)n).setWrapText(true);
+							c.setWrapText(true);
 						}
-						else if(n instanceof TextArea)
+						else if(n instanceof TextArea c)
 						{
-							((TextArea)n).setWrapText(true);
+							c.setWrapText(true);
 						}
 						else
 						{
@@ -393,54 +402,54 @@ public final class FX
 						}
 						break;
 					default:
-						throw new Error("?" + a);
+						throw new Error("?" + v);
 					}
 				}
-				else if(a instanceof Insets)
+				else if(a instanceof Insets v)
 				{
-					((Region)n).setPadding((Insets)a);
+					((Region)n).setPadding(v);
 				}
-				else if(a instanceof OverrunStyle)
+				else if(a instanceof OverrunStyle v)
 				{
-					((Labeled)n).setTextOverrun((OverrunStyle)a);
+					((Labeled)n).setTextOverrun(v);
 				}
-				else if(a instanceof Pos)
+				else if(a instanceof Pos v)
 				{
-					if(n instanceof Labeled)
+					if(n instanceof Labeled c)
 					{
-						((Labeled)n).setAlignment((Pos)a);
+						c.setAlignment(v);
 					}
-					else if(n instanceof TextField)
+					else if(n instanceof TextField c)
 					{
-						((TextField)n).setAlignment((Pos)a);
+						c.setAlignment(v);
 					}
 					else
 					{
 						throw new Error("?" + n);
 					}
 				}
-				else if(a instanceof String)
+				else if(a instanceof String s)
 				{
-					if(n instanceof Labeled)
+					if(n instanceof Labeled c)
 					{
-						((Labeled)n).setText((String)a);
+						c.setText(s);
 					}
-					else if(n instanceof TextInputControl)
+					else if(n instanceof TextInputControl c)
 					{
-						((TextInputControl)n).setText((String)a);
+						c.setText(s);
 					}
 					else
 					{
 						throw new Error("?" + n);
 					}
 				}
-				else if(a instanceof TextAlignment)
+				else if(a instanceof TextAlignment v)
 				{
-					((Labeled)n).setTextAlignment((TextAlignment)a);
+					((Labeled)n).setTextAlignment(v);
 				}
-				else if(a instanceof Background)
+				else if(a instanceof Background v)
 				{
-					((Region)n).setBackground((Background)a);
+					((Region)n).setBackground(v);
 				}
 				else
 				{
@@ -702,17 +711,6 @@ public final class FX
 		double bottom = w.getY() + w.getHeight() - b.getMaxY();
 
 		return new Insets(top, right, bottom, left);
-	}
-	
-	
-	/** 
-	 * attaches a handler to be notified when settings for the node have been loaded.  
-	 * setting null clears the handler 
-	 */
-	@Deprecated // FIX remove
-	private static void setOnSettingsLoaded(Node n, Runnable r)
-	{
-		//FxSchema.setOnSettingsLoaded(n, r);
 	}
 	
 	
@@ -983,13 +981,13 @@ public final class FX
 	{
 		for(Object x: nodes)
 		{
-			if(x instanceof Node)
+			if(x instanceof Node n)
 			{
-				((Node)x).setDisable(on);
+				n.setDisable(on);
 			}
-			else if(x instanceof FxAction)
+			else if(x instanceof FxAction a)
 			{
-				((FxAction)x).setDisabled(on);
+				a.setDisabled(on);
 			}
 		}
 	}
@@ -2103,5 +2101,40 @@ public final class FX
 		{
 			log.error(e);
 		}
+	}
+
+	
+	public static void setName(Node n, String name)
+	{
+		n.getProperties().put(PROP_NAME, name);
+	}
+	
+	
+	public static String getName(Node n)
+	{
+		Object x = n.getProperties().get(PROP_NAME);
+		if(x instanceof String s)
+		{
+			return s;
+		}
+		return null;
+	}
+	
+	
+	public static void setName(Window w, String name)
+	{
+		Objects.nonNull(name);
+		w.getProperties().put(PROP_NAME, name);
+	}
+	
+	
+	public static String getName(Window w)
+	{
+		Object x = w.getProperties().get(PROP_NAME);
+		if(x instanceof String s)
+		{
+			return s;
+		}
+		return null;
 	}
 }

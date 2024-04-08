@@ -1,9 +1,9 @@
 // Copyright © 2023-2024 Andy Goryachev <andy@goryachev.com>
 package goryachev.demo;
 import goryachev.demo.gallery.GalleryView;
-import goryachev.fx.FX;
 import goryachev.fx.FxButton;
 import goryachev.fx.FxDump;
+import goryachev.fx.FxFramework;
 import goryachev.fx.FxMenuBar;
 import goryachev.fx.FxTabPane;
 import goryachev.fx.FxToolBar;
@@ -91,7 +91,7 @@ public class MainWindow extends FxWindow
 		m.separator();
 		m.item("Close Window", closeWindowAction());
 		m.separator();
-		m.item("Quit", FX.exitAction());
+		m.item("Quit", FxFramework.exitAction());
 		// edit
 		m.menu("Edit");
 		m.item("Undo");

@@ -34,7 +34,7 @@ public class FxWindow
 	public FxWindow(String name)
 	{
 		this.pane = new BorderPane();
-		FxSettings.setName(this, name);
+		FX.setName(this, name);
 		
 		Scene sc = new Scene(pane);
 		setScene(sc);
@@ -157,6 +157,6 @@ public class FxWindow
 	
 	public String toString()
 	{
-		return "FxWindow{" + FxSettings.getName(this) + "." + hashCode() + "}";
+		return "FxWindow{" + FX.getName(this) + "." + hashCode() + "}";
 	}
 }

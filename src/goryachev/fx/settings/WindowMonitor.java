@@ -1,13 +1,14 @@
 // Copyright © 2024 Andy Goryachev <andy@goryachev.com>
-package goryachev.fx.internal;
+package goryachev.fx.settings;
 import goryachev.common.log.Log;
 import goryachev.common.util.CList;
 import goryachev.common.util.CSet;
 import goryachev.common.util.GlobalSettings;
 import goryachev.fx.CssLoader;
 import goryachev.fx.FX;
+import goryachev.fx.FxFramework;
 import goryachev.fx.FxObject;
-import goryachev.fx.FxSettings;
+import goryachev.fx.util.FxTools;
 import java.util.List;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.scene.Node;
@@ -23,10 +24,10 @@ import javafx.stage.Window;
  * Remembers the location/size and attributes of windows.
  * Keeps track of Z order of open windows.
  */
-public class WinMonitor
+public class WindowMonitor
 {
+	private static final Log log = Log.get("WindowMonitor");
 	private static final String SEPARATOR = "_";
-	private static final Log log = Log.get("WinMonitor");
 	private static final Object WIN_MONITOR_PROP = new Object();
 	/** in reverse order: top window is last */
 	private static final CList<Window> stack = new CList<>();
@@ -45,7 +46,7 @@ public class WinMonitor
 	private double hNorm;
 
 
-	public WinMonitor(Window win, String id)
+	public WindowMonitor(Window win, String id)
 	{
 		this.window = win;
 		this.id = id;
@@ -143,21 +144,27 @@ public class WinMonitor
 				{
 					for(Window w: ch.getAddedSubList())
 					{
-						log.debug("added: %s", w);
-						// window is already showing
-						FxSettings.restore(w);
-						applyStyleSheet(w);
+						if(!isIgnore(w))
+						{
+							log.debug("added: %s", w);
+							// window is already showing
+							FxFramework.restore(w);
+							applyStyleSheet(w);
+						}
 					}
 				}
 				else if(ch.wasRemoved())
 				{
 					for(Window w: ch.getRemoved())
 					{
-						log.debug("removed: %s", w);
-						// the only problem here is that window is already hidden - does it matter?
-						// if it does, need to listen to WindowEvent.WINDOW_HIDING event
-						FxSettings.store(w);
-						stack.remove(w);
+						if(!isIgnore(w))
+						{
+							log.debug("removed: %s", w);
+							// the only problem here is that window is already hidden - does it matter?
+							// if it does, need to listen to WindowEvent.WINDOW_HIDING event
+							FxFramework.store(w);
+							stack.remove(w);
+						}
 					}
 					
 					GlobalSettings.save();
@@ -165,6 +172,19 @@ public class WinMonitor
 			}
 		});
 		stack.addAll(Window.getWindows());
+		dumpStack();
+	}
+	
+	
+	private static void dumpStack()
+	{
+		log.debug(() ->
+		{
+			return stack.stream().
+				map((w) -> FxTools.describe(w)).
+				toList().
+				toString();
+		});
 	}
 	
 	
@@ -182,7 +202,7 @@ public class WinMonitor
 
 	private static String createID(Window win, String useID)
 	{
-		String name = FxSettings.getName(win);
+		String name = FX.getName(win);
 		if(name != null)
 		{
 			// collect existing ids
@@ -191,7 +211,7 @@ public class WinMonitor
 			{
 				if(w != win)
 				{
-					WinMonitor m = get(w);
+					WindowMonitor m = get(w);
 					if(m != null)
 					{
 						String id = m.getID();
@@ -240,32 +260,28 @@ public class WinMonitor
 	}
 	
 	
-	public static WinMonitor forWindow(Window w)
+	public static WindowMonitor forWindow(Window w)
 	{
 		return forWindow(w, null);
 	}
 
 
-	public static WinMonitor forWindow(Window w, String useID)
+	public static WindowMonitor forWindow(Window w, String useID)
 	{
 		if(w != null)
 		{
-			if(w instanceof Tooltip)
+			if(isIgnore(w))
 			{
 				return null;
 			}
-			else if(w instanceof ContextMenu)
-			{
-				return null;
-			}
-			
-			WinMonitor m = get(w);
+				
+			WindowMonitor m = get(w);
 			if(m == null)
 			{
 				String id = createID(w, useID);
 				if(id != null)
 				{
-					m = new WinMonitor(w, id);
+					m = new WindowMonitor(w, id);
 					set(w, m);
 				}
 			}
@@ -275,10 +291,24 @@ public class WinMonitor
 	}
 	
 	
-	private static WinMonitor get(Window w)
+	static boolean isIgnore(Window w)
+	{
+		if(w instanceof Tooltip)
+		{
+			return true;
+		}
+		else if(w instanceof ContextMenu)
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	
+	private static WindowMonitor get(Window w)
 	{
 		Object x = w.getProperties().get(WIN_MONITOR_PROP);
-		if(x instanceof WinMonitor m)
+		if(x instanceof WindowMonitor m)
 		{
 			return m;
 		}
@@ -286,13 +316,13 @@ public class WinMonitor
 	}
 
 	
-	private static void set(Window w, WinMonitor m)
+	private static void set(Window w, WindowMonitor m)
 	{
 		w.getProperties().put(WIN_MONITOR_PROP, m);
 	}
 
 	
-	public static WinMonitor forNode(Node n)
+	public static WindowMonitor forNode(Node n)
 	{
 		Scene s = n.getScene();
 		if(s != null)
@@ -354,15 +384,33 @@ public class WinMonitor
 	}
 	
 	
-	private static void updateFocusedWindow(Window w)
+	/**
+	 * Finds a topmost window in the supplied list.
+	 */ 
+	public static <W extends Window> W findTopWindow(List<W> list)
+	{
+		for(int i=stack.size() - 1; i>=0; i--)
+		{
+			Window w = stack.get(i);
+			if(list.contains(w))
+			{
+				return (W)w;
+			}
+		}
+		return null;
+	}
+	
+	
+	static void updateFocusedWindow(Window w)
 	{
 		log.debug(w);
 		stack.remove(w);
 		stack.add(w);
+		dumpStack();
 	}
 	
 	
-	private static void updateFocusOwner(Node n)
+	static void updateFocusOwner(Node n)
 	{
 		if(n != null)
 		{
@@ -382,5 +430,4 @@ public class WinMonitor
 	{
 		return lastFocusOwner.getReadOnlyProperty();
 	}
-
 }

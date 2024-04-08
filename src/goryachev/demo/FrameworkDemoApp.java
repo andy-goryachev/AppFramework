@@ -4,8 +4,9 @@ import goryachev.common.log.Log;
 import goryachev.common.util.CPlatform;
 import goryachev.common.util.GlobalSettings;
 import goryachev.fx.CssLoader;
-import goryachev.fx.FxSettings;
-import goryachev.fx.internal.FxSettingsSchema;
+import goryachev.fx.FxFramework;
+import goryachev.fx.settings.ASettingsStore;
+import goryachev.fx.settings.FxSettingsSchema;
 import java.io.File;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -29,7 +30,7 @@ public class FrameworkDemoApp extends Application
 	public void init()
 	{
 		File settings = new File(CPlatform.getSettingsFolder(), "FrameworkDemoApp/settings.conf");
-		FxSettings.initFileProvider(settings);		
+		GlobalSettings.setFileProvider(settings);		
 	}
 
 
@@ -42,16 +43,24 @@ public class FrameworkDemoApp extends Application
 		DemoData d = new DemoData();
 		
 		// support multiple windows
-		FxSettingsSchema schema = new FxSettingsSchema(GlobalSettings.instance());
-		FxSettings.openLayout(schema, (name) ->
+		ASettingsStore store = GlobalSettings.instance();
+		FxFramework.openLayout(new FxSettingsSchema(store)
 		{
-			if(SecondaryWindow.NAME.equals(name))
-			{
-				return new SecondaryWindow();
-			}
-			else
+			public Stage createDefaultWindow()
 			{
 				return new MainWindow(d);
+			}
+
+			protected Stage createWindow(String name)
+			{
+				if(SecondaryWindow.NAME.equals(name))
+				{
+					return new SecondaryWindow();
+				}
+				else
+				{
+					return new MainWindow(d);
+				}
 			}
 		});
 	}

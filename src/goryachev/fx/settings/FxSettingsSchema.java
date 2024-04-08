@@ -1,15 +1,14 @@
 // Copyright © 2016-2024 Andy Goryachev <andy@goryachev.com>
-package goryachev.fx.internal;
+package goryachev.fx.settings;
+import goryachev.common.log.Log;
 import goryachev.common.util.SB;
 import goryachev.common.util.SStream;
 import goryachev.fx.CPane;
 import goryachev.fx.FX;
 import goryachev.fx.FxDialog;
-import goryachev.fx.FxSettings;
-import goryachev.fx.FxWindow;
-import goryachev.fx.ISettingsSchema;
+import goryachev.fx.FxFramework;
+import goryachev.fx.util.FxTools;
 import java.util.List;
-import java.util.function.Function;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -51,10 +50,18 @@ import javafx.stage.Window;
 /**
  * Stores and restores the UI state.
  */
-public class FxSettingsSchema
-	implements ISettingsSchema
+// TODO consider making it generic <ActualWindow>
+public abstract class FxSettingsSchema
 {
-	private static final String FX_PREFIX = "FX.";
+	public abstract Stage createDefaultWindow();
+
+	protected abstract Stage createWindow(String name);
+	
+	protected void loadWindowContent(WindowMonitor m, Stage w) { }
+
+	//
+	
+	protected static final String FX_PREFIX = "FX.";
 	
 	private static final String SFX_WINDOWS = "WINDOWS";
 	private static final String SFX_COLUMNS = ".COLS";
@@ -72,10 +79,7 @@ public class FxSettingsSchema
 	private static final String WINDOW_ICONIFIED = "I";
 	private static final String WINDOW_NORMAL = "N";
 	
-	@Deprecated // FIX remove
-	private static final Object PROP_LOAD_HANDLER = new Object();
-	private static final Object PROP_SKIP_SETTINGS = new Object();
-	
+	private static final Log log = Log.get("FxSettingsSchema");
 	private final ASettingsStore store;
 	
 	
@@ -85,57 +89,84 @@ public class FxSettingsSchema
 	}
 	
 	
-	public void storeWindow(Window win)
+	public void storeWindow(Window w)
 	{
-		WinMonitor m = WinMonitor.forWindow(win);
+		log.debug(() -> FxTools.describe(w));
+		
+		if(FX.isSkipSettings(w))
+		{
+			return;
+		}
+
+		WindowMonitor m = WindowMonitor.forWindow(w);
 		if(m != null)
 		{
-			double x = m.getX();
-			double y = m.getY();
-			double w = m.getW();
-			double h = m.getH();
-			
-			SStream ss = new SStream();
-			ss.add(x);
-			ss.add(y);
-			ss.add(w);
-			ss.add(h);
-			
-			if(win instanceof Stage s)
-			{
-				if(s.isFullScreen())
-				{
-					ss.add(WINDOW_FULLSCREEN);
-				}
-				else if(s.isMaximized())
-				{
-					ss.add(WINDOW_MAXIMIZED);
-				}
-				else if(s.isIconified())
-				{
-					ss.add(WINDOW_ICONIFIED);
-				}
-				else
-				{
-					ss.add(WINDOW_NORMAL);
-				}
-			}
-
-			store.setStream(FX_PREFIX + m.getID(), ss);
-			
-			Node n = win.getScene().getRoot();
-            storeNode(n);
+			storeWindowLocal(w, m);
 		}
 	}
 	
 	
-	public void restoreWindow(Window win)
+	protected void storeWindowLocal(Window w, WindowMonitor m)
 	{
-		if(win instanceof PopupWindow)
+		double x = m.getX();
+		double y = m.getY();
+		double width = m.getW();
+		double height = m.getH();
+		
+		SStream ss = new SStream();
+		ss.add(x);
+		ss.add(y);
+		ss.add(width);
+		ss.add(height);
+		
+		if(w instanceof Stage s)
+		{
+			if(s.isFullScreen())
+			{
+				ss.add(WINDOW_FULLSCREEN);
+			}
+			else if(s.isMaximized())
+			{
+				ss.add(WINDOW_MAXIMIZED);
+			}
+			else if(s.isIconified())
+			{
+				ss.add(WINDOW_ICONIFIED);
+			}
+			else
+			{
+				ss.add(WINDOW_NORMAL);
+			}
+		}
+
+		store.setStream(FX_PREFIX + m.getID(), ss);
+		
+		LocalSettings s = LocalSettings.getOrNull(w);
+		if(s != null)
+		{
+			String k = FX_PREFIX + m.getID() + SFX_SETTINGS;
+			s.saveValues(k, store);
+		}
+		
+		Node n = w.getScene().getRoot();
+        storeNode(n);
+	}
+	
+	
+	public void restoreWindow(Window w)
+	{
+		log.debug(() -> FxTools.describe(w));
+
+		if(w instanceof PopupWindow)
 		{
 			return;
 		}
-		else if(win instanceof Stage s)
+		
+		if(FX.isSkipSettings(w))
+		{
+			return;
+		}
+		else if(w instanceof Stage s)
 		{
 			if(s.getModality() != Modality.NONE)
 			{
@@ -143,73 +174,86 @@ public class FxSettingsSchema
 			}
 		}
 		
-		WinMonitor m = WinMonitor.forWindow(win);
+		WindowMonitor m = WindowMonitor.forWindow(w);
 		if(m != null)
 		{
-			SStream ss = store.getStream(FX_PREFIX + m.getID());
-			if(ss != null)
+			restoreWindowLocal(w, m);
+			
+			LocalSettings s = LocalSettings.getOrNull(w);
+			if(s != null)
 			{
-				double x = ss.nextDouble(-1);
-				double y = ss.nextDouble(-1);
-				double w = ss.nextDouble(-1);
-				double h = ss.nextDouble(-1);
-				String state = ss.nextString(WINDOW_NORMAL);
-				
-				if((w > 0) && (h > 0))
+				String k = FX_PREFIX + m.getID() + SFX_SETTINGS;
+				s.loadValues(k, store);
+			}
+			
+			Node n = w.getScene().getRoot();
+            restoreNode(n);
+		}
+	}
+	
+	
+	protected void restoreWindowLocal(Window w, WindowMonitor m)
+	{
+		SStream ss = store.getStream(FX_PREFIX + m.getID());
+		if(ss != null)
+		{
+			double x = ss.nextDouble(-1);
+			double y = ss.nextDouble(-1);
+			double width = ss.nextDouble(-1);
+			double height = ss.nextDouble(-1);
+			String state = ss.nextString(WINDOW_NORMAL);
+			
+			if((width > 0) && (height > 0))
+			{
+				if
+				(
+					FX.isValidCoordinates(x, y) &&
+					(!(w instanceof FxDialog))
+				)
 				{
-					if
-					(
-						FX.isValidCoordinates(x, y) &&
-						(!(win instanceof FxDialog))
-					)
-					{
-						// iconified windows have (x,y) of -32000 for some reason
-						// their coordinates are essentially lost (unless there is a way to get them in FX)
-						win.setX(x);
-						win.setY(y);
-					}
+					// iconified windows have (x,y) of -32000 for some reason
+					// their coordinates are essentially lost (unless there is a way to get them in FX)
+					w.setX(x);
+					w.setY(y);
+				}
 
-					if(win instanceof Stage s)
+				if(w instanceof Stage s)
+				{
+					if(s.isResizable())
 					{
-						if(s.isResizable())
+						w.setWidth(width);
+						w.setHeight(height);
+					}
+					else
+					{
+						width = w.getWidth();
+						height = w.getHeight();
+					}
+					
+					switch(state)
+					{
+					case WINDOW_FULLSCREEN:
+						s.setFullScreen(true);
+						break;
+					case WINDOW_MAXIMIZED:
+						s.setMaximized(true);
+						break;
+					}
+					
+					if(w instanceof FxDialog d)
+					{
+						Window parent = d.getOwner();
+						if(parent != null)
 						{
-							win.setWidth(w);
-							win.setHeight(h);
-						}
-						else
-						{
-							w = win.getWidth();
-							h = win.getHeight();
-						}
-						
-						switch(state)
-						{
-						case WINDOW_FULLSCREEN:
-							s.setFullScreen(true);
-							break;
-						case WINDOW_MAXIMIZED:
-							s.setMaximized(true);
-							break;
-						}
-						
-						if(win instanceof FxDialog d)
-						{
-							Window parent = d.getOwner();
-							if(parent != null)
-							{
-								double cx = parent.getX() + (parent.getWidth() / 2);
-								double cy = parent.getY() + (parent.getHeight() / 2);
-								// TODO check 
-								d.setX(cx - w/2);
-								d.setY(cy - h/2);
-							}
+							double cx = parent.getX() + (parent.getWidth() / 2);
+							double cy = parent.getY() + (parent.getHeight() / 2);
+							// TODO check 
+							d.setX(cx - width/2);
+							d.setY(cy - height/2);
 						}
 					}
 				}
 			}
-			
-			Node n = win.getScene().getRoot();
-            restoreNode(n);
 		}
 	}
 
@@ -221,7 +265,7 @@ public class FxSettingsSchema
 			return;
 		}
 
-		if(isSkipSettings(n))
+		if(FX.isSkipSettings(n))
 		{
 			return;
 		}
@@ -232,13 +276,19 @@ public class FxSettingsSchema
 			return;
 		}
 
-		LocalSettings s = LocalSettings.find(n);
+		LocalSettings s = LocalSettings.getOrNull(n);
 		if(s != null)
 		{
 			String k = name + SFX_SETTINGS;
-			s.saveValues(k);
+			s.saveValues(k, store);
 		}
-
+		
+		storeNodeLocal(n, name);
+	}
+	
+	
+	protected void storeNodeLocal(Node n, String name)
+	{
 		if(n instanceof CheckBox cb)
 		{
 			storeCheckBox(cb, name);
@@ -290,13 +340,11 @@ public class FxSettingsSchema
 		{
 			return;
 		}
-
-		if(isSkipSettings(n))
+		else if(FX.isSkipSettings(n))
 		{
 			return;
 		}
-
-		if(handleNullScene(n))
+		else if(handleNullScene(n))
 		{
 			return;
 		}
@@ -307,13 +355,19 @@ public class FxSettingsSchema
 			return;
 		}
 
-		LocalSettings s = LocalSettings.find(n);
+		LocalSettings s = LocalSettings.getOrNull(n);
 		if(s != null)
 		{
 			String k = name + SFX_SETTINGS;
-			s.loadValues(k);
+			s.loadValues(k, store);
 		}
-
+		
+		restoreNodeLocal(n, name);
+	}
+	
+	
+	protected void restoreNodeLocal(Node n, String name)
+	{
 		if(n instanceof CheckBox cb)
 		{
 			restoreCheckBox(cb, name);
@@ -356,13 +410,6 @@ public class FxSettingsSchema
 				}
 			}
 		}
-
-		// TODO is this really needed?
-		Runnable r = getOnSettingsLoaded(n);
-		if(r != null)
-		{
-			r.run();
-		}
 	}
 	
 
@@ -376,11 +423,11 @@ public class FxSettingsSchema
 		{
 			node.sceneProperty().addListener(new ChangeListener<Scene>()
 			{
-				public void changed(ObservableValue<? extends Scene> src, Scene old, Scene scene)
+				public void changed(ObservableValue<? extends Scene> src, Scene old, Scene sc)
 				{
-					if(scene != null)
+					if(sc != null)
 					{
-						Window w = scene.getWindow();
+						Window w = sc.getWindow();
 						if(w != null)
 						{
 							node.sceneProperty().removeListener(this);
@@ -397,7 +444,7 @@ public class FxSettingsSchema
 
 	protected String computeName(Node n)
 	{
-		WinMonitor m = WinMonitor.forNode(n);
+		WindowMonitor m = WindowMonitor.forNode(n);
 		if(m != null)
 		{
 			SB sb = new SB();
@@ -412,6 +459,7 @@ public class FxSettingsSchema
 
 
 	// returns false if Node should be ignored
+	// n is not null
 	protected boolean collectNames(SB sb, Node n)
 	{
 		if(n instanceof MenuBar)
@@ -450,114 +498,78 @@ public class FxSettingsSchema
 
 	protected String getNodeName(Node n)
 	{
-		if(n != null)
+		String name = FX.getName(n);
+		if(name != null)
 		{
-			String name = FxSettings.getName(n);
-			if(name != null)
-			{
-				return name;
-			}
+			return name;
+		}
 
-			if(n instanceof Pane)
+		if(n instanceof Pane)
+		{
+			if(n instanceof AnchorPane)
 			{
-				if(n instanceof AnchorPane)
-				{
-					return "AnchorPane";
-				}
-				else if(n instanceof BorderPane)
-				{
-					return "BorderPane";
-				}
-				else if(n instanceof CPane)
-				{
-					return "CPane";
-				}
-				else if(n instanceof DialogPane)
-				{
-					return "DialogPane";
-				}
-				else if(n instanceof FlowPane)
-				{
-					return "FlowPane";
-				}
-				else if(n instanceof GridPane)
-				{
-					return "GridPane";
-				}
-				else if(n instanceof HBox)
-				{
-					return "HBox";
-				}
-				else if(n instanceof StackPane)
-				{
-					return "StackPane";
-				}
-				else if(n instanceof TextFlow)
-				{
-					return null;
-				}
-				else if(n instanceof TilePane)
-				{
-					return "TilePane";
-				}
-				else if(n instanceof VBox)
-				{
-					return "VBox";
-				}
-				else
-				{
-					return "Pane";
-				}
+				return "AnchorPane";
 			}
-			else if(n instanceof Control)
+			else if(n instanceof BorderPane)
 			{
-				return n.getClass().getSimpleName();
+				return "BorderPane";
 			}
-			else if(n instanceof Group)
+			else if(n instanceof CPane)
 			{
-				return "Group";
+				return "CPane";
 			}
-			else if(n instanceof Region)
+			else if(n instanceof DialogPane)
 			{
-				return "Region";
+				return "DialogPane";
+			}
+			else if(n instanceof FlowPane)
+			{
+				return "FlowPane";
+			}
+			else if(n instanceof GridPane)
+			{
+				return "GridPane";
+			}
+			else if(n instanceof HBox)
+			{
+				return "HBox";
+			}
+			else if(n instanceof StackPane)
+			{
+				return "StackPane";
+			}
+			else if(n instanceof TextFlow)
+			{
+				return null;
+			}
+			else if(n instanceof TilePane)
+			{
+				return "TilePane";
+			}
+			else if(n instanceof VBox)
+			{
+				return "VBox";
+			}
+			else
+			{
+				return "Pane";
 			}
 		}
-		return null;
-	}
-
-
-	@Deprecated // FIX remove
-	// replace with binding properties to LocalSettings
-	private static void setOnSettingsLoaded(Node n, Runnable r)
-	{
-		n.getProperties().put(PROP_LOAD_HANDLER, r);
-	}
-	
-	
-	@Deprecated // FIX remove
-	private static Runnable getOnSettingsLoaded(Node n)
-	{
-		Object x = n.getProperties().get(PROP_LOAD_HANDLER);
-		if(x instanceof Runnable)
+		else if(n instanceof Control)
 		{
-			return (Runnable)x;
+			return n.getClass().getSimpleName();
+		}
+		else if(n instanceof Group)
+		{
+			return "Group";
+		}
+		else if(n instanceof Region)
+		{
+			return "Region";
 		}
 		return null;
 	}
 	
-	
-	public static void setSkipSettings(Node n)
-	{
-		n.getProperties().put(PROP_SKIP_SETTINGS, Boolean.TRUE);
-	}
-	
-	
-	public static boolean isSkipSettings(Node n)
-	{
-		Object x = n.getProperties().get(PROP_SKIP_SETTINGS);
-		return Boolean.TRUE.equals(x);
-	}
-
 
 	protected void storeCheckBox(CheckBox n, String name)
 	{
@@ -818,10 +830,10 @@ public class FxSettingsSchema
 	 * Opens all previously opened windows using the specified generator.
 	 * Open a default window when no windows has been opened from the settings.
 	 */
-	public <W extends FxWindow> int openLayout(Function<String,W> generator)
+	public int openLayout()
 	{
 		// ensure WinMonitor is initialized 
-		WinMonitor.forWindow(null);
+		WindowMonitor.forWindow(null);
 		
 		// numEntries,name,id,... in reverse order 
 		SStream st = store.getStream(FX_PREFIX + SFX_WINDOWS);
@@ -834,15 +846,17 @@ public class FxSettingsSchema
 			{
 				String name = st.nextString();
 				String id = st.nextString();
-				FxWindow w = generator.apply(name);
+				Stage w = createWindow(name);
 				if(w != null)
 				{
 					// ensure that the window monitor is created with the right id
-					WinMonitor.forWindow(w, id);
+					WindowMonitor m = WindowMonitor.forWindow(w, id);
+					
+					loadWindowContent(m, w);
 
 					if(!w.isShowing())
 					{
-						w.open();
+						w.show();
 					}
 					
 					count++;
@@ -852,8 +866,11 @@ public class FxSettingsSchema
 		
 		if(count == 0)
 		{
-			FxWindow w = generator.apply(null);
-			w.open();
+			Stage w = createDefaultWindow();
+			if(!w.isShowing())
+			{
+				w.show();
+			}
 			count++;
 		}
 		
@@ -863,8 +880,10 @@ public class FxSettingsSchema
 	
 	public void storeLayout()
 	{
+		log.debug();
+
 		SStream ss = new SStream();
-		List<Window> ws = WinMonitor.getWindowStack();
+		List<Window> ws = WindowMonitor.getWindowStack();
 		
 		int sz = ws.size();
 		ss.add(sz);
@@ -872,10 +891,10 @@ public class FxSettingsSchema
 		for(int i=0; i<sz; i++)
 		{
 			Window w = ws.get(i);
-			FxSettings.store(w);
+			FxFramework.store(w);
 			
-			String name = FxSettings.getName(w);
-			String id = WinMonitor.forWindow(w).getIDPart();
+			String name = FX.getName(w);
+			String id = WindowMonitor.forWindow(w).getIDPart();
 			
 			ss.add(name);
 			ss.add(id);
@@ -890,5 +909,11 @@ public class FxSettingsSchema
 	public void save()
 	{
 		store.save();
+	}
+	
+	
+	protected ASettingsStore store()
+	{
+		return store;
 	}
 }
