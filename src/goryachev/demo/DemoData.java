@@ -268,9 +268,9 @@ public class DemoData
 			
 			messages.setAll
 			(
-				new Message("Application Framework", text),
-				new Message("License", license),
-				new Message("Notes", "1.\n2.\n3.")
+				new Message("Application Framework", text, t(-1)),
+				new Message("License", license, t(-2)),
+				new Message("Notes", "1.\n2.\n3.", t(-3))
 			);
 		}
 		return messages;
@@ -350,5 +350,11 @@ public class DemoData
 				return c.snapshot(null, null);
 			}
 		};
+	}
+	
+	private static long t(int offset)
+	{
+		long t = offset * 4_456_489_123L;
+		return System.currentTimeMillis() + t;
 	}
 }

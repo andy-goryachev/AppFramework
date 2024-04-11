@@ -2,15 +2,16 @@
 package goryachev.demo;
 import goryachev.fx.CPane;
 import goryachev.fx.FxDateFormatter;
+import goryachev.fx.FxDecimalFormatter;
 import goryachev.fx.FxObject;
 import goryachev.fx.FxString;
 import goryachev.fx.table.FxTableColumn;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
-import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 
@@ -27,7 +28,8 @@ public class TableWithPreviewPane
 	protected final BorderPane detail;
 	protected final SplitPane split;
 	// TODO typically, application-wide option
-	protected static final FxDateFormatter FORMAT = new FxDateFormatter("yyyy/MM/dd HH:mm");
+	protected static final FxDateFormatter FORMAT_DATE = new FxDateFormatter("yyyy/MM/dd HH:mm");
+	protected static final FxDecimalFormatter FORMAT_NUMBER = new FxDecimalFormatter("#,##0");
 	
 	
 	public TableWithPreviewPane(ObservableList<Message> items)
@@ -54,17 +56,7 @@ public class TableWithPreviewPane
 			table.getColumns().add(c);
 		}
 		{
-			TableColumn<Message,Long> c = new TableColumn<>("Date");
-			c.setPrefWidth(70);
-			c.setCellValueFactory((en) ->
-			{
-				long t = en.getValue().getTime();
-				return new FxObject<Long>(t);
-			});
-			table.getColumns().add(c);
-		}
-		{
-			TableColumn<Message,String> c = new TableColumn<>("Title");
+			FxTableColumn<Message,String> c = new FxTableColumn<>("Title");
 			c.setPrefWidth(150);
 			c.setCellValueFactory((en) ->
 			{
@@ -73,13 +65,28 @@ public class TableWithPreviewPane
 			table.getColumns().add(c);
 		}
 		{
-			TableColumn<Message,String> c = new TableColumn<>("Text");
+			FxTableColumn<Message,String> c = new FxTableColumn<>("Text");
 			c.setPrefWidth(150);
 			c.setCellValueFactory((en) ->
 			{
 				String s = en.getValue().textProperty().getValue();
 				s = AppTools.contractWhitespace(s);
 				return new FxString(s);
+			});
+			table.getColumns().add(c);
+		}
+		{
+			FxTableColumn<Message,Long> c = new FxTableColumn<>("Milliseconds");
+			c.setPrefWidth(70);
+			c.setAlignment(Pos.CENTER_RIGHT);
+			c.setFormatter((t) ->
+			{
+				return formatNumber(t);
+			});
+			c.setCellValueFactory((en) ->
+			{
+				long t = en.getValue().getTime();
+				return new FxObject<Long>(t);
 			});
 			table.getColumns().add(c);
 		}
@@ -109,7 +116,18 @@ public class TableWithPreviewPane
 			return null;
 		}
 		
-		return FORMAT.format(t);
+		return FORMAT_DATE.format(t);
+	}
+	
+	
+	protected static String formatNumber(Long t)
+	{
+		if(t == null)
+		{
+			return null;
+		}
+		
+		return FORMAT_NUMBER.format(t);
 	}
 	
 	

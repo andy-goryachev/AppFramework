@@ -146,7 +146,7 @@ public class MainWindow extends FxWindow
 	
 	protected void addItem()
 	{
-		Message en = new Message(String.valueOf(System.currentTimeMillis()), "sample");
+		Message en = new Message(String.valueOf(System.currentTimeMillis()), "sample", System.currentTimeMillis());
 		data.getMessages().add(0, en);
 		listView.select(en);
 	}

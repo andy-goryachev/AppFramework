@@ -13,9 +13,9 @@ public class Message
 	private final FxString text = new FxString();
 	
 	
-	public Message(String title, String text)
+	public Message(String title, String text, long time)
 	{
-		this.time = System.currentTimeMillis();
+		this.time = time; //System.currentTimeMillis();
 		this.title.set(title);
 		this.text.set(text);
 	}
