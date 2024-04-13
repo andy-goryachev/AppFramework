@@ -1,5 +1,6 @@
 // Copyright © 2023-2024 Andy Goryachev <andy@goryachev.com>
 package goryachev.demo;
+import goryachev.common.util.D;
 import goryachev.demo.gallery.GalleryView;
 import goryachev.fx.FxButton;
 import goryachev.fx.FxDump;
@@ -8,6 +9,7 @@ import goryachev.fx.FxMenuBar;
 import goryachev.fx.FxTabPane;
 import goryachev.fx.FxToolBar;
 import goryachev.fx.FxWindow;
+import goryachev.fx.ShutdownChoice;
 import goryachev.fx.icon.FindIcon;
 import goryachev.fx.icon.GalleryIcon;
 import goryachev.fx.icon.HamburgerIcon;
@@ -79,6 +81,15 @@ public class MainWindow extends FxWindow
 		setBottom(createStatusBar());
 		
 		FxDump.attach(this);
+
+		// TODO add multiple windows arg
+		setClosingWindowOperation((exiting, multiple, choice) ->
+		{
+			// TODO show save dialog
+			D.print("exiting=" + exiting + " choice=" + choice);
+			// for now, simply return to continue with shutdown
+			return ShutdownChoice.CONTINUE;
+		});
 	}
 
 	
@@ -89,9 +100,9 @@ public class MainWindow extends FxWindow
 		m.menu("File");
 		m.item("Add Note", this::addItem);
 		m.separator();
-		m.item("Close Window", closeWindowAction());
+		m.item("Close Window", this::close);
 		m.separator();
-		m.item("Quit", FxFramework.exitAction());
+		m.item("Quit", FxFramework::exit);
 		// edit
 		m.menu("Edit");
 		m.item("Undo");

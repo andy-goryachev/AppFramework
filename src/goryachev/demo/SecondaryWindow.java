@@ -17,5 +17,6 @@ public class SecondaryWindow extends FxWindow
 		
 		setSize(600, 300);
 		setTitle("Secondary Window");
+		setNonEssentialWindow();
 	}
 }
