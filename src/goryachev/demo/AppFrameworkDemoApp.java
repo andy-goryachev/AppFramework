@@ -15,7 +15,7 @@ import javafx.stage.Stage;
 /**
  * Framework Demo App.
  */
-public class FrameworkDemoApp extends Application
+public class AppFrameworkDemoApp extends Application
 {
 	public static void main(String[] args)
 	{
@@ -23,13 +23,13 @@ public class FrameworkDemoApp extends Application
 		Log.initConsoleForDebug();
 		Log.getRoot().debug();
 
-		Application.launch(FrameworkDemoApp.class, args);
+		Application.launch(AppFrameworkDemoApp.class, args);
 	}
 	
 	
 	public void init()
 	{
-		File settings = new File(CPlatform.getSettingsFolder(), "FrameworkDemoApp/settings.conf");
+		File settings = new File(CPlatform.getSettingsFolder(), "AppFrameworkDemoApp/settings.conf");
 		GlobalSettings.setFileProvider(settings);		
 	}
 

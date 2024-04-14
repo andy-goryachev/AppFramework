@@ -3,6 +3,8 @@ package goryachev.demo;
 import goryachev.common.util.D;
 import goryachev.demo.gallery.GalleryView;
 import goryachev.fx.FxButton;
+import goryachev.fx.FxDialog;
+import goryachev.fx.FxDialogResponse;
 import goryachev.fx.FxDump;
 import goryachev.fx.FxFramework;
 import goryachev.fx.FxMenuBar;
@@ -27,7 +29,7 @@ import javafx.scene.paint.Color;
 
 
 /**
- * Demo application main window.
+ * Application Framework demo window.
  */
 public class MainWindow extends FxWindow
 {
@@ -41,13 +43,13 @@ public class MainWindow extends FxWindow
 	protected final TableWithPreviewPane tableView;
 	
 	
-	public MainWindow(DemoData d)
+	public MainWindow(DemoData db)
 	{
 		super("MainWindow");
 		
-		this.data = d;
+		this.data = db;
 
-		setTitle("App Framework Demo Window");
+		setTitle("Application Framework Demo");
 		setSize(1150, 800);
 		
 		searchField = new TextField();
@@ -90,6 +92,66 @@ public class MainWindow extends FxWindow
 			// for now, simply return to continue with shutdown
 			return ShutdownChoice.CONTINUE;
 		});
+		
+		// this method illustrates how to handle closing window request
+		setClosingWindowOperation((exiting, multiple, choice) ->
+		{
+			// is this way too complicated?
+			switch(choice)
+			{
+			case CANCEL: // won't happen
+			case CONTINUE: // won't happen
+			case DISCARD_ALL: // should not call
+				return ShutdownChoice.DISCARD_ALL;
+			case SAVE_ALL:
+				save();
+				return ShutdownChoice.SAVE_ALL;
+			}
+			
+			toFront();
+			
+			FxDialog<FxDialogResponse> d = new FxDialog<>(this, "SaveChanges");
+			d.setTitle("Save Changes?");
+			d.setContentText("This is an example of a dialog shown when closing a window.\nDo you want to save changes?");
+			
+			d.addButton("Cancel", FxDialogResponse.CANCEL);
+			d.fill();
+			if(multiple)
+			{
+				d.addButton("Discard All", FxButton.DESTRUCT, FxDialogResponse.DISCARD_ALL);
+			}
+			d.addButton("Discard", FxButton.DESTRUCT, FxDialogResponse.DISCARD);
+			if(multiple)
+			{
+				d.addButton("Save All", FxButton.AFFIRM, FxDialogResponse.SAVE_ALL);
+			}
+			d.addButton("Save", FxButton.AFFIRM, FxDialogResponse.SAVE).requestFocus();
+			
+			FxDialogResponse rsp = d.open(FxDialogResponse.CANCEL);
+			switch(rsp)
+			{
+			case CANCEL:
+				return ShutdownChoice.CANCEL;
+			case DISCARD_ALL:
+				return ShutdownChoice.DISCARD_ALL;
+			case SAVE:
+				save();
+				break;
+			case SAVE_ALL:
+				save();
+				return ShutdownChoice.SAVE_ALL;
+			case DISCARD:
+			default:
+				break;
+			}
+			return ShutdownChoice.CONTINUE;
+		});
+	}
+	
+	
+	public void save()
+	{
+		D.print();
 	}
 
 	
@@ -125,10 +187,10 @@ public class MainWindow extends FxWindow
 	private FxToolBar createToolBar()
 	{
 		FxToolBar t = new FxToolBar();
-		t.add(new FxButton("+Note", "Add a note", this::addItem));
-		t.add(new Button("#2"));
-		t.add(new Button("#3"));
-		t.add(new Button("#4"));
+		t.add(new FxButton("+Note", "Add a note", FxButton.AFFIRM, this::addItem));
+		t.add(new Button("Btn 2"));
+		t.add(new Button("Btn 3"));
+		t.add(new Button("Btn 4"));
 		t.fill();
 		t.add(new Label("Find: "));
 		t.add(searchField);
