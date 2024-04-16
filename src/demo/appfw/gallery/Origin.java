@@ -1,5 +1,5 @@
 // Copyright © 2024 Andy Goryachev <andy@goryachev.com>
-package goryachev.demo.gallery;
+package demo.appfw.gallery;
 import goryachev.common.util.FH;
 
 

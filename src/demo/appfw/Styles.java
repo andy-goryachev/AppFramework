@@ -1,5 +1,5 @@
 // Copyright © 2023-2024 Andy Goryachev <andy@goryachev.com>
-package goryachev.demo;
+package demo.appfw;
 import goryachev.fx.CommonStyles;
 import goryachev.fx.FxStyleSheet;
 import goryachev.fx.Theme;

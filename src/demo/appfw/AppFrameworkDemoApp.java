@@ -1,5 +1,5 @@
 // Copyright © 2023-2024 Andy Goryachev <andy@goryachev.com>
-package goryachev.demo;
+package demo.appfw;
 import goryachev.common.log.Log;
 import goryachev.common.util.ASettingsStore;
 import goryachev.common.util.CPlatform;

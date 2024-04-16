@@ -1,5 +1,5 @@
 // Copyright © 2024 Andy Goryachev <andy@goryachev.com>
-package goryachev.demo;
+package demo.appfw;
 import goryachev.common.util.SB;
 
 

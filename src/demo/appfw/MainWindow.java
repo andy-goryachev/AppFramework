@@ -1,7 +1,6 @@
 // Copyright © 2023-2024 Andy Goryachev <andy@goryachev.com>
-package goryachev.demo;
+package demo.appfw;
 import goryachev.common.util.D;
-import goryachev.demo.gallery.GalleryView;
 import goryachev.fx.FxButton;
 import goryachev.fx.FxDialog;
 import goryachev.fx.FxDialogResponse;
@@ -16,6 +15,7 @@ import goryachev.fx.icon.FindIcon;
 import goryachev.fx.icon.GalleryIcon;
 import goryachev.fx.icon.HamburgerIcon;
 import goryachev.fx.icon.StarIcon;
+import demo.appfw.gallery.GalleryView;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.Button;

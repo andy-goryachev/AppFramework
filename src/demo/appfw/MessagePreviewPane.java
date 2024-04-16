@@ -1,5 +1,5 @@
 // Copyright © 2023-2024 Andy Goryachev <andy@goryachev.com>
-package goryachev.demo;
+package demo.appfw;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;

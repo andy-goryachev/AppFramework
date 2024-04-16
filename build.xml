@@ -6,7 +6,7 @@
 
 	<!-- project name -->
 	<property name="TARGET" value="AppFramework"/>
-	<property name="MAIN_CLASS" value="goryachev.demo.FrameworkDemoApp"/>
+	<property name="MAIN_CLASS" value="demo.appfw.AppFrameworkDemoApp"/>
 	
 	<!-- libraries -->
 	<path id="libs">

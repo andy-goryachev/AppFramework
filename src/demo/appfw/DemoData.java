@@ -1,10 +1,10 @@
 // Copyright © 2024 Andy Goryachev <andy@goryachev.com>
-package goryachev.demo;
+package demo.appfw;
 import goryachev.common.util.MurmurHash3;
-import goryachev.demo.gallery.Gallery;
-import goryachev.demo.gallery.GalleryFolder;
-import goryachev.demo.gallery.GalleryItem;
 import java.util.Random;
+import demo.appfw.gallery.Gallery;
+import demo.appfw.gallery.GalleryFolder;
+import demo.appfw.gallery.GalleryItem;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;

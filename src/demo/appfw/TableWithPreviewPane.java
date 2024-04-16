@@ -1,5 +1,5 @@
 // Copyright © 2023-2024 Andy Goryachev <andy@goryachev.com>
-package goryachev.demo;
+package demo.appfw;
 import goryachev.fx.CPane;
 import goryachev.fx.FxDateFormatter;
 import goryachev.fx.FxDecimalFormatter;
