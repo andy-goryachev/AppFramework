@@ -1,11 +1,11 @@
 // Copyright © 2023-2024 Andy Goryachev <andy@goryachev.com>
 package goryachev.demo;
 import goryachev.common.log.Log;
+import goryachev.common.util.ASettingsStore;
 import goryachev.common.util.CPlatform;
 import goryachev.common.util.GlobalSettings;
 import goryachev.fx.CssLoader;
 import goryachev.fx.FxFramework;
-import goryachev.fx.settings.ASettingsStore;
 import goryachev.fx.settings.FxSettingsSchema;
 import java.io.File;
 import javafx.application.Application;
