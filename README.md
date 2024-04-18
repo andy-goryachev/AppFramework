@@ -17,10 +17,10 @@ This is pretty much work in progress, so don't even think of using it in product
 ## Example
 
 Example application:
-[FrameworkDemoApp.java](https://github.com/andy-goryachev/AppFramework/blob/main/src/goryachev/demo/FrameworkDemoApp.java)
+[AppFrameworkDemoApp.java](src/demo/appfw/AppFrameworkDemoApp.java)
 
 Main application window:
-[MainWindow.java](https://github.com/andy-goryachev/AppFramework/blob/main/src/goryachev/demo/MainWindow.java)
+[MainWindow.java](src/demo/appfw/MainWindow.java)
 
 
 
