@@ -59,6 +59,7 @@ import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableView;
@@ -582,33 +583,38 @@ public final class FX
 	
 	
 	/** 
-	 * returns parent window or null, accepts either a Node or a Window.
-	 * unfortunately, FX Window is not a Node, so we have to lose some type safety 
+	 * Returns parent window or null.
+	 * Accepts either a Node, a Window, or a MenuItem.
 	 */
-	public static Window getParentWindow(Object nodeOrWindow)
+	public static Window getParentWindow(Object x)
 	{
-		if(nodeOrWindow == null)
+		if(x == null)
 		{
 			return null;
 		}
-		else if(nodeOrWindow instanceof Window)
+		else if(x instanceof Window w)
 		{
-			return (Window)nodeOrWindow;
+			return w;
 		}
-		else if(nodeOrWindow instanceof Node)
+		else if(x instanceof Node n)
 		{
-			Scene s = ((Node)nodeOrWindow).getScene();
+			Scene s = n.getScene();
 			if(s != null)
 			{
 				return s.getWindow();
 			}
 			return null;
 		}
+		else if(x instanceof MenuItem m)
+		{
+			ContextMenu cm = m.getParentPopup();
+			return cm == null ? null : cm.getOwnerWindow();
+		}
 		else
 		{
-			throw new Error("node or window");
+			throw new Error("node, window, or menu item " + x);
 		}
-	}
+	}	
 	
 	
 	/** shortcut for Platform.runLater() */

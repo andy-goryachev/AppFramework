@@ -82,16 +82,7 @@ public class MainWindow extends FxWindow
 		setCenter(sidePane);
 		setBottom(createStatusBar());
 		
-		FxDump.attach(this);
-
-		// TODO add multiple windows arg
-		setClosingWindowOperation((exiting, multiple, choice) ->
-		{
-			// TODO show save dialog
-			D.print("exiting=" + exiting + " choice=" + choice);
-			// for now, simply return to continue with shutdown
-			return ShutdownChoice.CONTINUE;
-		});
+		FxDump.attach(this); // FIX
 		
 		// this method illustrates how to handle closing window request
 		setClosingWindowOperation((exiting, multiple, choice) ->
