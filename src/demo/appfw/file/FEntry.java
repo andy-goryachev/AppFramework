@@ -2,7 +2,6 @@
 package demo.appfw.file;
 import goryachev.common.util.CComparator;
 import goryachev.common.util.CList;
-import goryachev.common.util.D;
 import goryachev.fx.FxObject;
 import goryachev.fx.FxString;
 import java.io.File;
@@ -18,7 +17,7 @@ public class FEntry
 	public final FxString name = new FxString();
 	public final FxObject<Long> date = new FxObject<>();
 	public final FxObject<Long> length = new FxObject<>();
-	private Boolean leaf;
+	private final boolean leaf;
 	private final File file;
 	
 	
@@ -26,6 +25,7 @@ public class FEntry
 	{
 		this.file = f;
 		
+		leaf = !f.isDirectory();
 		name.set(f.getName());
 		date.set(f.lastModified());
 		if(f.isFile())
@@ -37,19 +37,12 @@ public class FEntry
 	
 	public boolean isLeaf()
 	{
-		if(leaf == null)
-		{
-			leaf = !file.isDirectory();
-		}
 		return leaf;
 	}
 	
 	
-	
 	protected List<FEntry> loadChildren()
 	{
-		D.print(file);
-
 		File[] fs = file.listFiles();
 		if(fs == null)
 		{

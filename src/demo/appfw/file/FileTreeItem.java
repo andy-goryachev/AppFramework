@@ -38,15 +38,16 @@ public class FileTreeItem
 	@Override
 	public ObservableList<TreeItem<FEntry>> getChildren()
 	{
+		ObservableList<TreeItem<FEntry>> children = super.getChildren();
 		if(!loaded)
 		{
+			loaded = true;
 			if(!isLeaf())
 			{
 				List<TreeItem<FEntry>> cs = CKit.transform(getValue().loadChildren(), FileTreeItem::new);
-				super.getChildren().setAll(cs);
+				children.setAll(cs);
 			}
-			loaded = true;
 		}
-		return super.getChildren();
+		return children;
 	}
 }

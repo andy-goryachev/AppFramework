@@ -93,7 +93,7 @@ public class TreeTableWithPreviewPane
 					}
 				};
 			});
-			c.setPrefWidth(90);
+			c.setPrefWidth(110);
 			tree.getColumns().add(c);
 		}
 		{
