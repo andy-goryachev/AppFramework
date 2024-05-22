@@ -41,6 +41,7 @@ public class MainWindow extends FxWindow
 	protected final MessageTableListWithPreviewPane listTable;
 	protected final GalleryView galleryView;
 	protected final TableWithPreviewPane tableView;
+	protected final TreeTableWithPreviewPane treeView;
 	
 	
 	public MainWindow(DemoData db)
@@ -63,6 +64,8 @@ public class MainWindow extends FxWindow
 		
 		tableView = new TableWithPreviewPane(data.getMessages());
 		
+		treeView = new TreeTableWithPreviewPane();
+		
 		// TODO .tab-header-area style
 		FxTabPane sidePane = new FxTabPane();
 		sidePane.setSide(Side.LEFT);
@@ -70,7 +73,7 @@ public class MainWindow extends FxWindow
 		sidePane.addTab(t(new StarIcon(ICON_SIZE, Color.YELLOW), "Table View", tableView));
 		sidePane.addTab(t(new GalleryIcon(ICON_SIZE - 6, 2, 2), "Gallery View", galleryView));
 		sidePane.addTab(t(new HamburgerIcon(ICON_SIZE), "List Table With Preview", listTable));
-		sidePane.addTab(t(new FindIcon(ICON_SIZE), "TBD", null));
+		sidePane.addTab(t(new FindIcon(ICON_SIZE), "Tree Table With Preview", treeView));
 		
 		VBox vb = new VBox
 		(
