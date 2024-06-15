@@ -335,12 +335,14 @@ public class DemoData
 		
 		return new GalleryItem()
 		{
+			@Override
 			public byte[] getOriginal()
 			{
 				return null;
 			}
 			
 			
+			@Override
 			public Image getImage(double width, double height)
 			{
 				Canvas c = new Canvas(width, height);

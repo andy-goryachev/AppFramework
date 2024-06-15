@@ -51,6 +51,7 @@ public class FEntry
 		
 		Arrays.sort(fs, new CComparator<File>()
 		{
+			@Override
 			public int compare(File a, File b)
 			{
 				if(a.isDirectory())

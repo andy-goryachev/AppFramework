@@ -103,6 +103,7 @@ public class GalleryView
 		{
 			vGap = new FxDouble(0.0)
 			{
+				@Override
 				protected void invalidated()
 				{
 					requestLayout();
@@ -131,6 +132,7 @@ public class GalleryView
 		{
 			hGap = new FxDouble(0.0)
 			{
+				@Override
 				protected void invalidated()
 				{
 					requestLayout();
@@ -153,6 +155,7 @@ public class GalleryView
 	}
 
 
+	@Override
 	protected void layoutChildren()
 	{
 		super.layoutChildren();

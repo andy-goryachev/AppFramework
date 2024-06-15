@@ -41,6 +41,7 @@ public class Origin
 	}
 	
 	
+	@Override
 	public boolean equals(Object x)
 	{
 		if(x == this)
@@ -58,6 +59,7 @@ public class Origin
 	}
 	
 	
+	@Override
 	public int hashCode()
 	{
 		int h = FH.hash(Origin.class);

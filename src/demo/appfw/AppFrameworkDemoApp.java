@@ -27,6 +27,7 @@ public class AppFrameworkDemoApp extends Application
 	}
 	
 	
+	@Override
 	public void init()
 	{
 		File settings = new File(CPlatform.getSettingsFolder(), "AppFrameworkDemoApp/settings.conf");
@@ -34,6 +35,7 @@ public class AppFrameworkDemoApp extends Application
 	}
 
 
+	@Override
 	public void start(Stage s) throws Exception
 	{
 		// generate stylesheet
@@ -46,11 +48,13 @@ public class AppFrameworkDemoApp extends Application
 		ASettingsStore store = GlobalSettings.instance();
 		FxFramework.openLayout(new FxSettingsSchema(store)
 		{
+			@Override
 			public Stage createDefaultWindow()
 			{
 				return new MainWindow(d);
 			}
 
+			@Override
 			protected Stage createWindow(String name)
 			{
 				if(SecondaryWindow.NAME.equals(name))
