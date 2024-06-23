@@ -4,7 +4,6 @@ import goryachev.common.log.Log;
 import goryachev.common.util.ASettingsStore;
 import goryachev.common.util.CPlatform;
 import goryachev.common.util.GlobalSettings;
-import goryachev.fx.CssLoader;
 import goryachev.fx.FxFramework;
 import goryachev.fx.settings.FxSettingsSchema;
 import java.io.File;
@@ -39,7 +38,7 @@ public class AppFrameworkDemoApp extends Application
 	public void start(Stage s) throws Exception
 	{
 		// generate stylesheet
-		CssLoader.setStyles(Styles::new);
+		FxFramework.setStyleSheet(Styles::new);
 
 		// create/load data and open the main window
 		DemoData d = new DemoData();
