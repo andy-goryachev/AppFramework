@@ -8,6 +8,7 @@ import goryachev.common.util.SB;
 import goryachev.fx.FX;
 import goryachev.fx.FxFlags;
 import goryachev.fx.FxStyleSheet;
+import goryachev.fx.settings.WindowMonitor;
 import java.util.function.Supplier;
 import javafx.application.Platform;
 
@@ -36,6 +37,10 @@ public class CssLoader
 		FX.checkThread();
 		
 		generator = gen;
+		
+		// ensure WinMonitor is initialized 
+		WindowMonitor.forWindow(null);
+
 		updateStyles();
 
 		if(REFRESH)

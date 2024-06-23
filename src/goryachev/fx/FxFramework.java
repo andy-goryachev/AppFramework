@@ -102,7 +102,10 @@ public class FxFramework
 	
 	public static void restore(Window w)
 	{
-		schema.restoreWindow(w);
+		if(schema != null)
+		{
+			schema.restoreWindow(w);
+		}
 	}
 	
 	
