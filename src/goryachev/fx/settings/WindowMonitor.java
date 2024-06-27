@@ -3,7 +3,6 @@ package goryachev.fx.settings;
 import goryachev.common.log.Log;
 import goryachev.common.util.CList;
 import goryachev.common.util.CSet;
-import goryachev.common.util.GlobalSettings;
 import goryachev.fx.ClosingWindowOperation;
 import goryachev.fx.FX;
 import goryachev.fx.FxFramework;
@@ -42,6 +41,7 @@ public class WindowMonitor
 	private final static FxObject<Node> lastFocusOwner = new FxObject<>();
 	private static boolean exiting;
 	private static ShutdownChoice shutdownChoice;
+	
 	static { init(); }
 	
 	private final Window window;
@@ -154,6 +154,8 @@ public class WindowMonitor
 	{
 		FX.addChangeListener(Window.getWindows(), (ch) ->
 		{
+			boolean save = false;
+
 			while(ch.next())
 			{
 				if(ch.wasAdded())
@@ -179,13 +181,18 @@ public class WindowMonitor
 							// if it does, need to listen to WindowEvent.WINDOW_HIDING event
 							FxFramework.store(w);
 							stack.remove(w);
+							save = true;
 						}
 					}
-					
-					GlobalSettings.save();
+				}
+				
+				if(save)
+				{
+					FxFramework.save();
 				}
 			}
 		});
+		
 		stack.addAll(Window.getWindows());
 		dumpStack();
 	}
