@@ -70,7 +70,8 @@ public class WindowMonitor
 		{
 			updateFocusOwner(c);
 		};
-		
+
+		// FIX does not work
 		w.sceneProperty().addListener((src,prev,cur) ->
 		{
 			if(prev != null)
@@ -83,6 +84,13 @@ public class WindowMonitor
 				cur.focusOwnerProperty().addListener(focusListener);
 			}
 		});
+		if(w.getScene() != null)
+		{
+			if(w.getScene().getFocusOwner() != null)
+			{
+				updateFocusOwner(w.getScene().getFocusOwner());
+			}
+		}
 		
 		w.focusedProperty().addListener((src,prev,cur) ->
 		{

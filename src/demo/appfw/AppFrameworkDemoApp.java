@@ -6,6 +6,7 @@ import goryachev.common.util.CPlatform;
 import goryachev.common.util.GlobalSettings;
 import goryachev.fx.FxFramework;
 import goryachev.fx.settings.FxSettingsSchema;
+import goryachev.fx.settings.WindowMonitor;
 import java.io.File;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -30,7 +31,12 @@ public class AppFrameworkDemoApp extends Application
 	public void init()
 	{
 		File settings = new File(CPlatform.getSettingsFolder(), "AppFrameworkDemoApp/settings.conf");
-		GlobalSettings.setFileProvider(settings);		
+		GlobalSettings.setFileProvider(settings);
+		
+		WindowMonitor.lastFocusOwnerProperty().addListener((s,p,v) ->
+		{
+			System.out.println(v);
+		});
 	}
 
 

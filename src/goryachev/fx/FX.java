@@ -2288,4 +2288,14 @@ public final class FX
 			node.setScaleY(scale);
 		}
 	}
+
+
+	/**
+	 * Returns the property value, or the default value if the property value is null.
+	 */
+	public static <T> T noNull(Property<T> p, T defaultValue)
+	{
+		T v = p.getValue();
+		return (v == null) ? defaultValue : v;
+	}
 }
