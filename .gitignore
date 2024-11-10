@@ -2,10 +2,9 @@
 /out/
 /user.home*/
 /user.data*/
-~*
 /*.jar
 /*.log
 /*.conf
+~*
 hs_err_pid*
-/test.out/
-/Private Notes.txt
+.DS_Store
