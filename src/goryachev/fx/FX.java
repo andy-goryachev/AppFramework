@@ -4,6 +4,7 @@ import goryachev.common.log.Log;
 import goryachev.common.util.CKit;
 import goryachev.common.util.CList;
 import goryachev.common.util.CPlatform;
+import goryachev.common.util.HasDisplayText;
 import goryachev.common.util.IDisconnectable;
 import goryachev.common.util.SystemTask;
 import goryachev.fx.internal.CssTools;
@@ -15,6 +16,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -43,9 +45,12 @@ import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.transformation.TransformationList;
+import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
@@ -86,6 +91,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import javafx.util.StringConverter;
 
 
 /**
@@ -101,10 +107,10 @@ public final class FX
 	public static final double ONE_OVER_GAMMA = 1.0 / GAMMA;
 	private static Text helper;
 	private static final Object PROP_TOOLTIP = new Object();
-	
-	// TODO move both to FxSettings?
 	private static final Object PROP_NAME = new Object();
 	private static final Object PROP_SKIP_SETTINGS = new Object();
+	private static EventHandler consumeAll;
+	private static StringConverter converter;
 	
 	
 	public static FxWindow getWindow(Node n)
@@ -1577,6 +1583,20 @@ public final class FX
 	
 	
 	/** avoid ambiguous signature warning when using addListener */
+	public static void addInvalidationListener(Observable p, Runnable r)
+	{
+		p.addListener(new InvalidationListener()
+		{
+			@Override
+			public void invalidated(Observable observable)
+			{
+				r.run();
+			}
+		});
+	}
+	
+	
+	/** avoid ambiguous signature warning when using addListener */
 	public static <T> void addChangeListener(ObservableList<T> list, ListChangeListener<? super T> li)
 	{
 		list.addListener(li);
@@ -2297,5 +2317,71 @@ public final class FX
 	{
 		T v = p.getValue();
 		return (v == null) ? defaultValue : v;
+	}
+
+
+	/**
+	 * Adds an event filter which consumes all events of the specified type.
+	 */
+	public static <T extends Event> void consumeAllEvents(EventType<T> type, Node n)
+	{
+		if(consumeAll == null)
+		{
+			consumeAll = (ev) -> ev.consume();
+		}
+		n.addEventFilter(type, consumeAll);
+	}
+
+
+	/**
+	 * Combines parent CSS metadata with the list of metadata items for the given class.
+	 */
+	public static List<CssMetaData<? extends Styleable,?>> initCssMetadata(List<CssMetaData<? extends Styleable,?>> parentCss, CssMetaData<?,?> ... css)
+	{
+		int sz = parentCss.size() + css.length;
+		ArrayList<CssMetaData<? extends Styleable,?>> a = new ArrayList<>(sz);
+		a.addAll(parentCss);
+		for(int i = 0; i < css.length; i++)
+		{
+			a.add(css[i]);
+		}
+		return Collections.unmodifiableList(a);
+	}
+	
+	
+	/**
+	 * Returns a StringConverter which uses HasDisplayText.getDisplayText()
+	 * or Object.toString().
+	 * This converter cannot convert a String to an Object.
+	 */
+	public static  <T> StringConverter<T> standardConverter()
+	{
+		if(converter == null)
+		{
+			converter = new StringConverter<Object>()
+			{
+				@Override
+				public String toString(Object x)
+				{
+					if(x == null)
+					{
+						return "";
+					}
+					else if(x instanceof HasDisplayText t)
+					{
+						return t.getDisplayText();
+					}
+					return x.toString();
+				}
+				
+
+				@Override
+				public Object fromString(String s)
+				{
+					throw new Error("not supported");
+				}
+			};
+		}
+		return converter;
 	}
 }

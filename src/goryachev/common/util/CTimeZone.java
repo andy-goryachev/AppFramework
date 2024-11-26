@@ -6,7 +6,7 @@ import java.util.TimeZone;
 
 // TODO why do I have this class?
 public class CTimeZone
-	implements HasProperty, HasDisplayName
+	implements HasProperty, HasDisplayText
 {
 	public final TimeZone tz;
 
@@ -24,7 +24,7 @@ public class CTimeZone
 
 
 	@Override
-	public String getDisplayName()
+	public String getDisplayText()
 	{
 		return tz.getDisplayName(Locale.getDefault());
 	}
@@ -40,7 +40,7 @@ public class CTimeZone
 	@Override
 	public String toString()
 	{
-		return getDisplayName() + " - " + getID();
+		return getDisplayText() + " - " + getID();
 	}
 	
 	
