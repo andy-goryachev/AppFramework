@@ -2,6 +2,8 @@
 
 Provides a convenient base for JavaFX applications.
 
+
+
 ## Features
 
 - remembers locations of windows and user selection
@@ -12,6 +14,7 @@ Provides a convenient base for JavaFX applications.
 This is pretty much work in progress, so don't even think of using it in production.  The APIs will definitely change.
 
 ![screenshot](doc/screenshot.png)
+
 
 
 ## Example
@@ -26,7 +29,7 @@ Main application window:
 
 ## Software Requirements
 
-Requires JDK 21+ with JavaFX 21+.
+Requires JDK 23+ with JavaFX 23+.
 
 
 
