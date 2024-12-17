@@ -24,6 +24,8 @@ public class CssStyle
 	private static long seq;
 
 
+	/** TODO remove */
+	@Deprecated
 	public CssStyle(String name)
 	{
 		this.name = generateName(name);
@@ -40,6 +42,7 @@ public class CssStyle
 	{
 		if(CssLoader.DUMP)
 		{
+			// TODO Or better yet, match to the static field name
 			StackTraceElement s = new Throwable().getStackTrace()[2];
 			String c = s.getClassName().replace('.', '_');
 			return c + "-L" + s.getLineNumber() + (name == null ? "" : "-" + name);

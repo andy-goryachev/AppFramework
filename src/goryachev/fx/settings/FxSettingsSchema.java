@@ -590,7 +590,10 @@ public abstract class FxSettingsSchema
 		Boolean sel = store.getBoolean(FX_PREFIX + name);
 		if(sel != null)
 		{
-			n.setSelected(sel);
+			if(!n.selectedProperty().isBound())
+			{
+				n.setSelected(sel);
+			}
 		}
 	}
 

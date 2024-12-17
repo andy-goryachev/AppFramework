@@ -10,7 +10,9 @@ public final class TextCellMetrics
 {
 	public final Font font;
 	public final double baseLine;
+	/** snapped */
 	public final double cellWidth;
+	/** snapped */
 	public final double cellHeight;
 	
 	
