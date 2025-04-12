@@ -15,14 +15,6 @@ which in turn was inspired by
 [Demo_CPane.java](../../test/goryachev/fx/Demo_CPane.java)
 
 ```java
-public class Demo_CPane extends Application
-{
-	public static void main(String[] args)
-	{
-		launch(args);
-	}
-	
-	
 	@Override
 	public void start(Stage stage) throws Exception
 	{
@@ -58,7 +50,6 @@ public class Demo_CPane extends Application
 		stage.setTitle("CPane");
 		stage.show();
 	}
-}
 ```
 
 
