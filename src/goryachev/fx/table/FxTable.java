@@ -1,4 +1,4 @@
-// Copyright © 2016-2024 Andy Goryachev <andy@goryachev.com>
+// Copyright © 2016-2025 Andy Goryachev <andy@goryachev.com>
 package goryachev.fx.table;
 import goryachev.common.util.CList;
 import goryachev.fx.CommonStyles;
@@ -434,7 +434,7 @@ public class FxTable<T>
 	public void setAlternateRowsColoring(boolean on)
 	{
 		// https://stackoverflow.com/questions/38680711/javafx-tableview-remove-default-alternate-row-color
-		FX.style(table, !on, CommonStyles.DISABLE_ALTERNATIVE_ROW_COLOR);
+		CommonStyles.DISABLE_ALTERNATIVE_ROW_COLOR.set(table, !on);
 	}
 	
 	

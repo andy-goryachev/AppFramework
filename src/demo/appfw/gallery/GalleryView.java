@@ -5,6 +5,7 @@ import goryachev.fx.FxDouble;
 import goryachev.fx.FxObject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -28,7 +29,7 @@ public class GalleryView
 	public static final CssStyle FOLDER_LABEL = new CssStyle();
 	
 	private final FxObject<Gallery> gallery = new FxObject<>();
-	private final FxObject<Origin> origin = new FxObject<>(Origin.ZERO);
+	private final ReadOnlyObjectWrapper<Origin> origin = new ReadOnlyObjectWrapper<>(Origin.ZERO);
 	private FxObject<Insets> contentPadding;
 	private FxDouble hGap;
 	private FxDouble vGap;

@@ -1,5 +1,7 @@
-// Copyright © 2016-2024 Andy Goryachev <andy@goryachev.com>
+// Copyright © 2016-2025 Andy Goryachev <andy@goryachev.com>
 package goryachev.fx;
+import goryachev.fx.input.Func;
+import goryachev.fx.input.KB;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -20,7 +22,12 @@ import javafx.stage.Window;
 public class FxDialog<T>
 	extends FxWindow
 {
-	public static final CssStyle PANE = new CssStyle("FxDialog_PANE");
+	public static final class Fun
+	{
+		public static final Func CLOSE = new Func();
+	}
+	
+	public static final CssStyle PANE = new CssStyle();
 	private final BorderPane pane;
 	private T result;
 	
@@ -30,7 +37,9 @@ public class FxDialog<T>
 		super(name);
 		
 		initModality(Modality.APPLICATION_MODAL);
-		FX.style(getContentPane(), PANE);
+		PANE.set(getContentPane());
+		
+		getInputMap().regFunc(Fun.CLOSE, this::close);
 		
 		pane = new BorderPane();
 		setCenter(pane);
@@ -137,7 +146,7 @@ public class FxDialog<T>
 	
 	public void closeOnEscape()
 	{
-		KeyMap.onKeyPressed(getContentPane(), KeyCode.ESCAPE, this::close);
+		getInputMap().regKey(KB.of(KeyCode.ESCAPE), Fun.CLOSE);
 	}
 
 
