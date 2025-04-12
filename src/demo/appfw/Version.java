@@ -1,4 +1,4 @@
-// Copyright © 2024 Andy Goryachev <andy@goryachev.com>
+// Copyright © 2024-2025 Andy Goryachev <andy@goryachev.com>
 package demo.appfw;
 
 
@@ -7,5 +7,5 @@ package demo.appfw;
  */
 public class Version
 {
-	public static final String COPYRIGHT = "copyright © 2024 andy goryachev";
+	public static final String COPYRIGHT = "copyright © 2025 andy goryachev";
 }
