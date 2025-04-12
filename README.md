@@ -29,11 +29,11 @@ Main application window:
 
 ## Software Requirements
 
-Requires JDK 23+ with JavaFX 23+.
+Requires JDK 23+ with JavaFX 24+.
 
 
 
 ## License
 
-This project and its source code is licensed under the [BSD 2-Clause "Simplified" License](LICENSE).
+This project and its source code is licensed under the [MIT License](LICENSE).
 
