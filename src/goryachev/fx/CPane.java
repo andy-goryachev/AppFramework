@@ -1,7 +1,6 @@
 // Copyright © 2016-2025 Andy Goryachev <andy@goryachev.com>
 package goryachev.fx;
 import goryachev.common.log.Log;
-import goryachev.common.util.CKit; // FIX remove!
 import goryachev.common.util.CList;
 import java.util.List;
 import javafx.beans.value.ObservableValue;
@@ -23,7 +22,6 @@ import javafx.scene.layout.Region;
  * CPane is like my Swing CPanel, lays out nodes with an outer border layout and an inner table layout.
  * 
  * TODO ignore unmanaged components
- * TODO snap to pixel!
  */
 public class CPane
 	extends Pane
@@ -188,7 +186,7 @@ public class CPane
 	public final void insertColumn(int ix, double spec)
 	{
 		// TODO
-		CKit.todo();
+		throw new Error("(to be implemented)");
 	}
 	
 	
@@ -818,7 +816,7 @@ public class CPane
 							if(!skip)
 							{
 								double other = otherDimension(en, doingLayout);
-								int d = CKit.ceil(sizingMethod(pref, en.node, other));
+								double d = snap(sizingMethod(pref, en.node, other));
 								
 								// amount of space component occupies in this column
 								double cw = d - aggregateSize(start, i, gap);
@@ -952,31 +950,30 @@ public class CPane
 	private class Helper
 	{
 		private final boolean ltr;
-		public int mtop;
-		public int mbottom;
-		public int mleft;
-		public int mright;
+		public double mtop; // TODO use snappedXXXinsets directly!
+		public double mbottom;
+		public double mleft;
+		public double mright;
 		public Node centerComp;
 		public Node topComp;
 		public Node bottomComp;
 		public Node leftComp;
 		public Node rightComp;
-		private int tableLeft;
-		private int tableRight;
-		private int tableTop;
-		private int tableBottom;
-		private int midHeight;
+		private double tableLeft;
+		private double tableRight;
+		private double tableTop;
+		private double tableBottom;
+		private double midHeight;
 
 
 		public Helper()
 		{
 			ltr = true; // FIX (getNodeOrientation() == NodeOrientation.LEFT_TO_RIGHT);
 				
-			Insets m = getInsets();
-			mtop = CKit.round(m.getTop());
-			mbottom = CKit.round(m.getBottom());
-			mleft = CKit.round(m.getLeft());
-			mright = CKit.round(m.getRight());
+			mtop = snappedTopInset();
+			mbottom = snappedBottomInset();
+			mleft = snappedLeftInset();
+			mright = snappedRightInset();
 		}
 		
 
@@ -1036,20 +1033,20 @@ public class CPane
 		}
 		
 		
-		private int computeBorderHeight(boolean pref)
+		private double computeBorderHeight(boolean pref)
 		{
-			int h = 0;
+			double h = 0.0;
 			Node c;
 			
 			if((c = ltr ? leftComp : rightComp) != null)
 			{
-				int d = CKit.ceil(sizeHeight(pref, c));
+				double d = snapPositionY(sizeHeight(pref, c));
 				h = Math.max(d, h);
 			}
 			
 			if((c = ltr ? rightComp : leftComp) != null)
 			{
-				int d = CKit.ceil(sizeHeight(pref, c));
+				double d = snapPositionY(sizeHeight(pref, c));
 				h = Math.max(d, h);
 			}
 			
@@ -1057,63 +1054,63 @@ public class CPane
 			
 			if(centerComp != null)
 			{
-				int d = CKit.ceil(sizeHeight(pref, centerComp));
+				double d = snapPositionY(sizeHeight(pref, centerComp));
 				h = Math.max(d, h);
 			}
 			
 			if(topComp != null)
 			{
-				int d = CKit.ceil(sizeHeight(pref, topComp));
-				h += (d + getVGap());
+				double d = snapPositionY(sizeHeight(pref, topComp));
+				h = snapPositionY(h + d + getVGap());
 			}
 			
 			if(bottomComp != null)
 			{
-				int d = CKit.ceil(sizeHeight(pref, bottomComp));
-				h += (d + getVGap());
+				double d = snapPositionY(sizeHeight(pref, bottomComp));
+				h = snapPositionY(h + d + getVGap());
 			}
 
-			h += (mtop + mbottom);
+			h = snapPositionY(h + mtop + mbottom);
 			return h;
 		}
 		
 		
-		private int computeBorderWidth(boolean pref)
+		private double computeBorderWidth(boolean pref)
 		{
-			int w = 0;
+			double w = 0;
 			Node c;
 			
 			if((c = ltr ? leftComp : rightComp) != null)
 			{
-				int d = CKit.ceil(sizeWidth(pref, c));
-				w += (d + getHGap());
+				double d = snapPositionX(sizeWidth(pref, c));
+				w = snapPositionX(w + d + getHGap());
 			}
 			
 			if((c = ltr ? rightComp : leftComp) != null)
 			{
-				int d = CKit.ceil(sizeWidth(pref, c));
-				w += (d + getHGap());
+				double d = snapPositionX(sizeWidth(pref, c));
+				w = snapPositionX(w + d + getHGap());
 			}
 			
 			if(centerComp != null)
 			{
-				int d = CKit.ceil(sizeWidth(pref, centerComp));
-				w += d;
+				double d = snapPositionX(sizeWidth(pref, centerComp));
+				w = snapPositionX(w + d);
 			}
 			
 			if(topComp != null)
 			{
-				int d = CKit.ceil(sizeWidth(pref, topComp));
+				double d = snapPositionX(sizeWidth(pref, topComp));
 				w = Math.max(d, w);
 			}
 			
 			if(bottomComp != null)
 			{
-				int d = CKit.ceil(sizeWidth(pref, bottomComp));
+				double d = snapPositionX(sizeWidth(pref, bottomComp));
 				w = Math.max(d, w);
 			}
 
-			w += (mleft + mright);
+			w = snapPositionX(w + mleft + mright);
 			return w;
 		}
 		
@@ -1191,7 +1188,7 @@ public class CPane
 					double d = n.minHeight(other);
 					if(pref)
 					{
-						d = snap(Math.max(n.prefHeight(other), d));
+						d = Math.max(n.prefHeight(other), d);
 					}
 					return d;
 				}
@@ -1232,40 +1229,40 @@ public class CPane
 		// similar to border layout
 		private void layoutBorderComponents()
 		{	
-			int top = mtop;
-			int bottom = CKit.round(getHeight()) - mbottom;
-			int left = mleft;
-			int right = CKit.round(getWidth()) - mright;
+			double top = mtop;
+			double bottom = snapPositionY(getHeight() - mbottom);
+			double left = mleft;
+			double right = snapPositionX(getWidth() - mright);
 
 			Node c;
 			if(topComp != null)
 			{
 				c = topComp;
-				int h = CKit.ceil(c.prefHeight(right - left));
+				double h = snapPositionY(c.prefHeight(right - left));
 				setBounds(c, left, top, right - left, h);
-				top += (h + getVGap());
+				top = snapPositionY(top + h + getVGap());
 			}
 			
 			if(bottomComp != null)
 			{
 				c = bottomComp;
-				int h = CKit.ceil(c.prefHeight(right - left));
+				double h = snapPositionY(c.prefHeight(right - left));
 				setBounds(c, left, bottom - h, right - left, h);
-				bottom -= (h + getVGap());
+				bottom = snapPositionY(bottom - h - getVGap());
 			}
 			
 			if((c = (ltr ? rightComp : leftComp)) != null)
 			{
-				int w = CKit.ceil(c.prefWidth(bottom - top));
+				double w = snapPositionX(c.prefWidth(bottom - top));
 				setBounds(c, right - w, top, w, bottom - top);
-				right -= (w + getHGap());
+				right = snapPositionX(right - w - getHGap()); // FIX snap gaps?
 			}
 			
 			if((c = (ltr ? leftComp : rightComp)) != null)
 			{
-				int w = CKit.ceil(c.prefWidth(bottom - top));
+				double w = snapPositionX(c.prefWidth(bottom - top));
 				setBounds(c, left, top, w, bottom - top);
-				left += (w + getHGap());
+				left = snapPositionX(left + w + getHGap());
 			}
 
 			if(centerComp != null)
@@ -1287,7 +1284,7 @@ public class CPane
 		{
 			scanBorderComponents();
 			
-			int d = computeBorderWidth(pref);
+			double d = computeBorderWidth(pref);
 			
 			if(centerComp != null)
 			{
@@ -1297,7 +1294,7 @@ public class CPane
 			
 			Axis hor = createHorAxis();
 			double w = hor.computeSizes(pref, false);
-			return w + d;
+			return snapPositionX(w + d);
 		}
 		
 		
@@ -1305,7 +1302,7 @@ public class CPane
 		{
 			scanBorderComponents();
 			
-			double d = computeBorderHeight(pref);
+			double d = snapPositionY(computeBorderHeight(pref));
 			
 			if(centerComp != null)
 			{
@@ -1317,7 +1314,7 @@ public class CPane
 			double h = ver.computeSizes(pref, false);
 
 			// height is maximum of border midsection or table section
-			h = Math.max(h, midHeight) + (d - midHeight);
+			h = snapPositionY(Math.max(h, midHeight) + (d - midHeight));
 			return h;
 		}
 		
@@ -1327,7 +1324,7 @@ public class CPane
 			hor.computePositions(tableLeft, getHGap());
 			ver.computePositions(tableTop, getVGap());
 			
-			int xr = ltr ? 0 : tableRight + mright;
+			double xr = ltr ? 0 : tableRight + mright;
 			
 			int sz = entries.size();
 			for(int i=0; i<sz; i++)
