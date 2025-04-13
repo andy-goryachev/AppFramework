@@ -19,9 +19,9 @@ import javafx.scene.layout.Region;
 
 /**
  * CPane is a Pane that lays out its children using a layout resembling a combination of BorderPane and GridPane.
- * That is, the children can be added either as (top/bottom/left/right/center) and/or in a grid in the center area.
+ * That is, the children can be added either as (top/bottom/left/right) and/or in a grid in the center area.
  * 
- * TODO ignore unmanaged or invisible children
+ * TODO handle resizeable flag?
  * TODO clip the grid area when needed?
  * TODO bug: honor minimum size, use PERCENT to fill the remaining after all FILL are sized
  */
@@ -774,10 +774,14 @@ public class CPane
 				{
 					// scan entries to determine which ones ends at this column
 					// pick the largest
-					int n = entries.size();
-					for(int j=0; j<n; j++)
+					int ct = entries.size();
+					for(int j=0; j<ct; j++)
 					{
 						Entry en = entries.get(j);
+						if(!en.node.isManaged())
+						{
+							continue;
+						}
 						CC cc = en.cc;
 						int end = end(cc);
 						
@@ -951,25 +955,28 @@ public class CPane
 			for(int i=entries.size()-1; i>=0; i--)
 			{
 				Entry en = entries.get(i);
-				if(en.cc.border)
+				if(en.node.isManaged())
 				{
-					CC cc = en.cc;
-					
-					if(cc == TOP)
+					if(en.cc.border)
 					{
-						topComp = en.node;
-					}
-					else if(cc == BOTTOM)
-					{
-						bottomComp = en.node;
-					}
-					else if(cc == LEFT)
-					{
-						leftComp = en.node;
-					}
-					else if(cc == RIGHT)
-					{
-						rightComp = en.node;
+						CC cc = en.cc;
+						
+						if(cc == TOP)
+						{
+							topComp = en.node;
+						}
+						else if(cc == BOTTOM)
+						{
+							bottomComp = en.node;
+						}
+						else if(cc == LEFT)
+						{
+							leftComp = en.node;
+						}
+						else if(cc == RIGHT)
+						{
+							rightComp = en.node;
+						}
 					}
 				}
 			}
@@ -1260,6 +1267,10 @@ public class CPane
 			for(int i=0; i<sz; i++)
 			{
 				Entry en = entries.get(i);
+				if(!en.node.isManaged())
+				{
+					continue;
+				}
 				CC cc = en.cc;
 				
 				if(!cc.border)

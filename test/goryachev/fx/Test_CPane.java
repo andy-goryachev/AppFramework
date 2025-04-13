@@ -6,9 +6,12 @@ import javafx.beans.binding.Bindings;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
@@ -21,9 +24,6 @@ import javafx.stage.Stage;
  */
 public class Test_CPane extends Application
 {
-	public CPane cp;
-	
-	
 	public static void main(String[] args)
 	{
 		launch(args);
@@ -33,13 +33,74 @@ public class Test_CPane extends Application
 	@Override
 	public void start(Stage stage) throws Exception
 	{
-		Label info = new Label("This demonstrates table layout capabilities of CPane.  CPane is easier to use than GridPane because one does not have to set so many constraints on the inidividual nodes, and you also have border layout capability as well.");
+		FxTabPane p = new FxTabPane();
+		p.addTab("Layout", createCPane());
+		p.addTab("Managed", createManagedPane());
+		
+		stage.setScene(new Scene(p, 700, 500));
+		stage.setTitle("CPane Tester");
+		stage.show();
+	}
+	
+	
+	private Label m()
+	{
+		Label t = new Label();
+		t.textProperty().bind(Bindings.createStringBinding
+		(
+			() ->
+			{
+				return t.isManaged() ? "managed" : "not managed";
+			},
+			t.managedProperty()
+		));
+		return t;
+	}
+	
+	
+	private Node createManagedPane()
+	{
+		Label t2 = m();
+		BorderPane bp = new BorderPane();
+		bp.setCenter(t2);
+		
+		Label t = m();
+		
+		CheckBox managed = new CheckBox("managed");
+		managed.selectedProperty().bindBidirectional(t.managedProperty());
+		managed.selectedProperty().bindBidirectional(t2.managedProperty());
+		
+		CPane p = new CPane();
+		p.setGaps(10, 10);
+		p.setPadding(10);
+		p.addRows(CPane.PREF, CPane.PREF);
+		p.addColumns(CPane.PREF, CPane.FILL);
+		p.add(0, 0, t());
+		p.add(1, 0, t);
+		p.add(0, 1, t());
+		p.add(1, 1, t());
+		p.setBottom(managed);
+		p.setTop(bp);
+		return p;
+	}
+	
+	
+	private Node createCPane()
+	{
+		Label info = new Label
+		(
+			"""
+			This demonstrates table layout capabilities of the CPane.
+			CPane is easier to use than the GridPane because one does not have to set so many constraints on the inidividual nodes, and it also provides the borderPane-like layout as well.
+			"""
+		);
 		info.setWrapText(true);
+		info.setBackground(Background.fill(Color.gray(0.9)));
 
-		cp = new CPane();
-		cp.setGaps(10, 7);
-		cp.setPadding(10);
-		cp.addColumns
+		CPane p = new CPane();
+		p.setGaps(10, 7);
+		p.setPadding(10);
+		p.addColumns
 		(
 			CPane.FILL,
 			CPane.FILL,
@@ -48,7 +109,7 @@ public class Test_CPane extends Application
 			CPane.FILL,
 			CPane.PREF
 		);
-		cp.addRows
+		p.addRows
 		(
 			CPane.PREF,
 			CPane.PREF,
@@ -61,49 +122,49 @@ public class Test_CPane extends Application
 			CPane.PREF
 		);
 		int r = 0;
-		cp.add(0, r, 6, 1, info);
+		p.add(0, r, 6, 1, info);
 		r++;
-		cp.add(0, r, c(0));
-		cp.add(1, r, c(1));
-		cp.add(2, r, c(2));
-		cp.add(3, r, c(3));
-		cp.add(4, r, c(4));
-		cp.add(5, r, c(5));
+		p.add(0, r, c(p, 0));
+		p.add(1, r, c(p, 1));
+		p.add(2, r, c(p, 2));
+		p.add(3, r, c(p, 3));
+		p.add(4, r, c(p, 4));
+		p.add(5, r, c(p, 5));
 		r++;
-		cp.add(0, r, 1, 1, t());
-		cp.add(1, r, 4, 1, t());
-		cp.add(5, r, r(r));
+		p.add(0, r, 1, 1, t());
+		p.add(1, r, 4, 1, t());
+		p.add(5, r, r(p, r));
 		r++;
-		cp.add(0, r, 2, 1, t());
-		cp.add(2, r, 3, 1, t());
-		cp.add(5, r, r(r));
+		p.add(0, r, 2, 1, t());
+		p.add(2, r, 3, 1, t());
+		p.add(5, r, r(p, r));
 		r++;
-		cp.add(0, r, 3, 1, t());
-		cp.add(3, r, 2, 1, t());
-		cp.add(5, r, r(r));
+		p.add(0, r, 3, 1, t());
+		p.add(3, r, 2, 1, t());
+		p.add(5, r, r(p, r));
 		r++;
-		cp.add(0, r, 4, 1, t());
-		cp.add(4, r, 1, 1, t());
-		cp.add(5, r, r(r));
+		p.add(0, r, 4, 1, t());
+		p.add(4, r, 1, 1, t());
+		p.add(5, r, r(p, r));
 		r++;
-		cp.add(0, r, 5, 1, t());
-		cp.add(5, r, r(r));
+		p.add(0, r, 5, 1, t());
+		p.add(5, r, r(p, r));
 		r++;
-		cp.add(0, r, 1, 1, t());
-		cp.add(1, r, 3, 1, t());
-		cp.add(4, r, 1, 1, t());
-		cp.add(5, r, r(r));
+		p.add(0, r, 1, 1, t());
+		p.add(1, r, 3, 1, t());
+		p.add(4, r, 1, 1, t());
+		p.add(5, r, r(p, r));
 		r++;
-		cp.add(0, r, 2, 1, t());
-		cp.add(2, r, 1, 1, t());
-		cp.add(3, r, 2, 1, t());
-		cp.add(5, r, r(r));
+		p.add(0, r, 2, 1, t());
+		p.add(2, r, 1, 1, t());
+		p.add(3, r, 2, 1, t());
+		p.add(5, r, r(p, r));
 		
 		TextField hgapField = new TextField("5");
-		FX.addChangeListener(hgapField.textProperty(), true, (v) -> updateHGap(v));
+		FX.addChangeListener(hgapField.textProperty(), true, (v) -> updateHGap(p, v));
 		
 		TextField vgapField = new TextField("5");
-		FX.addChangeListener(vgapField.textProperty(), true, (v) -> updateVGap(v));
+		FX.addChangeListener(vgapField.textProperty(), true, (v) -> updateVGap(p, v));
 		
 		CPane bp = new CPane();
 		bp.setGaps(10, 7);
@@ -122,15 +183,12 @@ public class Test_CPane extends Application
 		bp.add(0, 1, FX.label("Vertical gap:", Pos.CENTER_RIGHT));
 		bp.add(1, 1, vgapField);
 
-		cp.setBottom(bp);
-		
-		stage.setScene(new Scene(cp, 700, 500));
-		stage.setTitle("CPane Tester");
-		stage.show();
+		p.setBottom(bp);
+		return p;
 	}
 	
 	
-	private void updateHGap(String s)
+	private void updateHGap(CPane cp, String s)
 	{
 		int v = Parsers.parseInt(s, -1);
 		if(v >= 0)
@@ -140,7 +198,7 @@ public class Test_CPane extends Application
 	}
 	
 	
-	private void updateVGap(String s)
+	private void updateVGap(CPane cp, String s)
 	{
 		int v = Parsers.parseInt(s, -1);
 		if(v >= 0)
@@ -154,7 +212,7 @@ public class Test_CPane extends Application
 	}
 	
 	
-	private Node c(int ix)
+	private Node c(CPane cp, int ix)
 	{
 		FxComboBox<Spec> c = new FxComboBox<Spec>(Spec.values());
 		c.select(Spec.FILL);
@@ -167,7 +225,7 @@ public class Test_CPane extends Application
 	}
 	
 	
-	private Node r(int ix)
+	private Node r(CPane cp, int ix)
 	{
 		FxComboBox<Spec> c = new FxComboBox<Spec>(Spec.values());
 		c.select(Spec.PREF);
@@ -180,7 +238,7 @@ public class Test_CPane extends Application
 	}
 	
 	
-	private Node t()
+	private Label t()
 	{
 		Label t = new Label();
 		t.setBackground(FX.background(Color.WHITE));
