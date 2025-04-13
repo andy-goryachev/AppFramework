@@ -678,7 +678,8 @@ public class CPane
 		public abstract double sizingMethod(boolean pref, Node c, double other);
 		
 		public abstract double otherDimension(Entry en, boolean doingLayout);
-		
+
+		/** snap size */
 		public abstract double snap(double v);
 		
 		//
@@ -710,10 +711,10 @@ public class CPane
 			
 			pos[0] = start;
 			
-			for(int i=0; i<sz; i++)
+			for(int i = 0; i < sz; i++)
 			{
 				start = snap(start + (size[i] + gap));
-				pos[i+1] = start;
+				pos[i + 1] = start;
 			}
 		}
 		
@@ -965,8 +966,8 @@ public class CPane
 		public Helper()
 		{
 			ltr = true; // FIX (getNodeOrientation() == NodeOrientation.LEFT_TO_RIGHT);
-			snappedHGap = snapPositionX(getHGap());
-			snappedVGap = snapPositionY(getVGap());
+			snappedHGap = snapSizeX(getHGap());
+			snappedVGap = snapSizeY(getVGap());
 		}
 		
 
@@ -1033,13 +1034,13 @@ public class CPane
 			
 			if((c = ltr ? leftComp : rightComp) != null)
 			{
-				double d = snapPositionY(sizeHeight(pref, c));
+				double d = snapSizeY(sizeHeight(pref, c));
 				h = Math.max(d, h);
 			}
 			
 			if((c = ltr ? rightComp : leftComp) != null)
 			{
-				double d = snapPositionY(sizeHeight(pref, c));
+				double d = snapSizeY(sizeHeight(pref, c));
 				h = Math.max(d, h);
 			}
 			
@@ -1047,23 +1048,23 @@ public class CPane
 			
 			if(centerComp != null)
 			{
-				double d = snapPositionY(sizeHeight(pref, centerComp));
+				double d = snapSizeY(sizeHeight(pref, centerComp));
 				h = Math.max(d, h);
 			}
 			
 			if(topComp != null)
 			{
-				double d = snapPositionY(sizeHeight(pref, topComp));
-				h = snapPositionY(h + d + snappedVGap);
+				double d = snapSizeY(sizeHeight(pref, topComp));
+				h = snapSizeY(h + d + snappedVGap);
 			}
 			
 			if(bottomComp != null)
 			{
-				double d = snapPositionY(sizeHeight(pref, bottomComp));
-				h = snapPositionY(h + d + snappedVGap);
+				double d = snapSizeY(sizeHeight(pref, bottomComp));
+				h = snapSizeY(h + d + snappedVGap);
 			}
 
-			h = snapPositionY(h + snappedTopInset() + snappedBottomInset());
+			h = snapSizeY(h + snappedTopInset() + snappedBottomInset());
 			return h;
 		}
 		
@@ -1075,35 +1076,35 @@ public class CPane
 			
 			if((c = ltr ? leftComp : rightComp) != null)
 			{
-				double d = snapPositionX(sizeWidth(pref, c));
-				w = snapPositionX(w + d + snappedHGap);
+				double d = snapSizeX(sizeWidth(pref, c));
+				w = snapSizeX(w + d + snappedHGap);
 			}
 			
 			if((c = ltr ? rightComp : leftComp) != null)
 			{
-				double d = snapPositionX(sizeWidth(pref, c));
-				w = snapPositionX(w + d + snappedHGap);
+				double d = snapSizeX(sizeWidth(pref, c));
+				w = snapSizeX(w + d + snappedHGap);
 			}
 			
 			if(centerComp != null)
 			{
-				double d = snapPositionX(sizeWidth(pref, centerComp));
-				w = snapPositionX(w + d);
+				double d = snapSizeX(sizeWidth(pref, centerComp));
+				w = snapSizeX(w + d);
 			}
 			
 			if(topComp != null)
 			{
-				double d = snapPositionX(sizeWidth(pref, topComp));
+				double d = snapSizeX(sizeWidth(pref, topComp));
 				w = Math.max(d, w);
 			}
 			
 			if(bottomComp != null)
 			{
-				double d = snapPositionX(sizeWidth(pref, bottomComp));
+				double d = snapSizeX(sizeWidth(pref, bottomComp));
 				w = Math.max(d, w);
 			}
 
-			w = snapPositionX(w + snappedLeftInset() + snappedRightInset());
+			w = snapSizeX(w + snappedLeftInset() + snappedRightInset());
 			return w;
 		}
 		
@@ -1149,7 +1150,7 @@ public class CPane
 				@Override
 				public double snap(double v)
 				{
-					return snapPositionX(v);
+					return snapSizeX(v);
 				}
 			};
 		}
@@ -1211,7 +1212,7 @@ public class CPane
 				@Override
 				public double snap(double v)
 				{
-					return snapPositionY(v);
+					return snapSizeY(v);
 				}
 			};
 		}
@@ -1229,7 +1230,7 @@ public class CPane
 			if(topComp != null)
 			{
 				c = topComp;
-				double h = snapPositionY(c.prefHeight(right - left));
+				double h = snapSizeY(c.prefHeight(right - left));
 				setBounds(c, left, top, right - left, h);
 				top = snapPositionY(top + h + snappedVGap);
 			}
@@ -1237,21 +1238,21 @@ public class CPane
 			if(bottomComp != null)
 			{
 				c = bottomComp;
-				double h = snapPositionY(c.prefHeight(right - left));
+				double h = snapSizeY(c.prefHeight(right - left));
 				setBounds(c, left, bottom - h, right - left, h);
 				bottom = snapPositionY(bottom - h - snappedVGap);
 			}
 			
 			if((c = (ltr ? rightComp : leftComp)) != null)
 			{
-				double w = snapPositionX(c.prefWidth(bottom - top));
+				double w = snapSizeX(c.prefWidth(bottom - top));
 				setBounds(c, right - w, top, w, bottom - top);
 				right = snapPositionX(right - w - snappedHGap);
 			}
 			
 			if((c = (ltr ? leftComp : rightComp)) != null)
 			{
-				double w = snapPositionX(c.prefWidth(bottom - top));
+				double w = snapSizeX(c.prefWidth(bottom - top));
 				setBounds(c, left, top, w, bottom - top);
 				left = snapPositionX(left + w + snappedHGap);
 			}
@@ -1285,7 +1286,7 @@ public class CPane
 			
 			Axis hor = createHorAxis();
 			double w = hor.computeSizes(pref, false);
-			return snapPositionX(w + d);
+			return snapSizeX(w + d);
 		}
 		
 		
@@ -1293,7 +1294,7 @@ public class CPane
 		{
 			scanBorderComponents();
 			
-			double d = snapPositionY(computeBorderHeight(pref));
+			double d = snapSizeY(computeBorderHeight(pref));
 			
 			if(centerComp != null)
 			{
@@ -1305,7 +1306,7 @@ public class CPane
 			double h = ver.computeSizes(pref, false);
 
 			// height is maximum of border midsection or table section
-			h = snapPositionY(Math.max(h, midHeight) + (d - midHeight));
+			h = snapSizeY(Math.max(h, midHeight) + (d - midHeight));
 			return h;
 		}
 		
@@ -1326,10 +1327,10 @@ public class CPane
 				if(!cc.border)
 				{
 					double x = hor.pos[cc.col];
-					double w = snapPositionX(hor.pos[cc.col2 + 1] - x - snappedHGap);
+					double w = snapSizeX(hor.pos[cc.col2 + 1] - x - snappedHGap);
 	
 					double y = ver.pos[cc.row];
-					double h = snapPositionY(ver.pos[cc.row2 + 1] - y - snappedVGap);
+					double h = snapSizeY(ver.pos[cc.row2 + 1] - y - snappedVGap);
 
 					if(ltr)
 					{
@@ -1352,7 +1353,7 @@ public class CPane
 			Axis hor = createHorAxis();
 			double w = hor.computeSizes(true, true);
 
-			double dw = snapPositionX(tableRight - tableLeft - w);
+			double dw = snapSizeX(tableRight - tableLeft - w);
 			if(dw != 0.0)
 			{
 				hor.adjust(dw);
@@ -1362,7 +1363,7 @@ public class CPane
 			ver.otherAxis = hor;
 			double h = ver.computeSizes(true, true);
 			
-			double dh = snapPositionY(tableBottom - tableTop - h);
+			double dh = snapSizeY(tableBottom - tableTop - h);
 			if(dh != 0.0)
 			{
 				ver.adjust(dh);
