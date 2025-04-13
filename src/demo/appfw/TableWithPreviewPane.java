@@ -1,6 +1,5 @@
 // Copyright © 2023-2025 Andy Goryachev <andy@goryachev.com>
 package demo.appfw;
-import goryachev.fx.CPane;
 import goryachev.fx.FxDateFormatter;
 import goryachev.fx.FxDecimalFormatter;
 import goryachev.fx.FxObject;
@@ -20,7 +19,7 @@ import javafx.scene.layout.BorderPane;
  * Table With Preview Pane.
  */
 public class TableWithPreviewPane
-	extends CPane
+	extends BorderPane
 {
 	protected final SortedList<Message> sortedItems;
 	protected final TableView<Message> table;

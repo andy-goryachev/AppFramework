@@ -9,7 +9,6 @@ import javafx.css.Styleable;
 import javafx.css.StyleableProperty;
 import javafx.css.StyleablePropertyFactory;
 import javafx.geometry.HPos;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
@@ -24,7 +23,6 @@ import javafx.scene.layout.Region;
  * 
  * TODO ignore unmanaged or invisible children
  * TODO clip the grid area when needed?
- * TODO explain what happens when both the center child and a grid one are present
  * TODO bug: honor minimum size, use PERCENT to fill the remaining after all FILL are sized
  */
 public class CPane
@@ -39,7 +37,6 @@ public class CPane
 	public static final CC BOTTOM = new CC(true);
 	public static final CC LEFT = new CC(true);
 	public static final CC RIGHT = new CC(true);
-	public static final CC CENTER = new CC(true);
 	
 	protected CList<Entry> entries = new CList<>();
 	protected CList<AC> cols = new CList<>();
@@ -51,12 +48,6 @@ public class CPane
 
 	public CPane()
 	{
-	}
-	
-	
-	public CPane(Node n)
-	{
-		setCenter(n);
 	}
 	
 	
@@ -285,13 +276,6 @@ public class CPane
 	}
 	
 	
-	public final Node add(Node c)
-	{
-		setCenter(c);
-		return c;
-	}
-	
-	
 	public final void addRow(int row, Node ... ns)
 	{
 		for(int i=0; i<ns.length; i++)
@@ -365,18 +349,6 @@ public class CPane
 			}
 		}
 		return old;
-	}
-	
-
-	public final Node setCenter(Node c)
-	{
-		return set(c, CENTER);
-	}
-
-
-	public final Node getCenter()
-	{
-		return getBorderComponent(CENTER);
 	}
 
 	
@@ -955,7 +927,6 @@ public class CPane
 		private final boolean ltr;
 		private final double snappedHGap;
 		private final double snappedVGap;
-		public Node centerComp;
 		public Node topComp;
 		public Node bottomComp;
 		public Node leftComp;
@@ -984,11 +955,7 @@ public class CPane
 				{
 					CC cc = en.cc;
 					
-					if(cc == CENTER)
-					{
-						centerComp = en.node;
-					}
-					else if(cc == TOP)
+					if(cc == TOP)
 					{
 						topComp = en.node;
 					}
@@ -1050,12 +1017,6 @@ public class CPane
 			
 			midHeight = h;
 			
-			if(centerComp != null)
-			{
-				double d = snapSizeY(sizeHeight(pref, centerComp));
-				h = Math.max(d, h);
-			}
-			
 			if(topComp != null)
 			{
 				double d = snapSizeY(sizeHeight(pref, topComp));
@@ -1088,12 +1049,6 @@ public class CPane
 			{
 				double d = snapSizeX(sizeWidth(pref, c));
 				w = snapSizeX(w + d + snappedHGap);
-			}
-			
-			if(centerComp != null)
-			{
-				double d = snapSizeX(sizeWidth(pref, centerComp));
-				w = snapSizeX(w + d);
 			}
 			
 			if(topComp != null)
@@ -1260,13 +1215,6 @@ public class CPane
 				setBounds(c, left, top, w, bottom - top);
 				left = snapPositionX(left + w + snappedHGap);
 			}
-
-			if(centerComp != null)
-			{
-				setBounds(centerComp, left, top, right - left, bottom - top);
-				right = left;
-				bottom = top;
-			}
 			
 			// space available for table layout components
 			tableLeft = left;
@@ -1281,13 +1229,6 @@ public class CPane
 			scanBorderComponents();
 			
 			double d = computeBorderWidth(pref);
-			
-			if(centerComp != null)
-			{
-				// center component overrides any table layout components
-				return d;
-			}
-			
 			Axis hor = createHorAxis();
 			double w = hor.computeSizes(pref, false);
 			return snapSizeX(w + d);
@@ -1299,13 +1240,6 @@ public class CPane
 			scanBorderComponents();
 			
 			double d = snapSizeY(computeBorderHeight(pref));
-			
-			if(centerComp != null)
-			{
-				// center component overrides any table layout components
-				return d;
-			}
-			
 			Axis ver = createVerAxis();
 			double h = ver.computeSizes(pref, false);
 

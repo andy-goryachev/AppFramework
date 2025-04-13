@@ -1,7 +1,5 @@
 // Copyright © 2024-2025 Andy Goryachev <andy@goryachev.com>
 package demo.appfw;
-import goryachev.common.util.D;
-import goryachev.fx.CPane;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -21,7 +19,7 @@ import javafx.scene.layout.BorderPane;
  * TreeTable With Preview Pane.
  */
 public class TreeTableWithPreviewPane
-	extends CPane
+	extends BorderPane
 {
 	protected final TreeTableView<FEntry> tree;
 	protected final BorderPane detail;
