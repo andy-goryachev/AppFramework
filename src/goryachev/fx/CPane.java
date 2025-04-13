@@ -19,9 +19,13 @@ import javafx.scene.layout.Region;
 
 
 /**
- * CPane is like my Swing CPanel, lays out nodes with an outer border layout and an inner table layout.
+ * CPane is a Pane that lays out its children using a layout resembling a combination of BorderPane and GridPane.
+ * That is, the children can be added either as (top/bottom/left/right/center) and/or in a grid in the center area.
  * 
- * TODO ignore unmanaged components
+ * TODO ignore unmanaged or invisible children
+ * TODO clip the grid area when needed?
+ * TODO explain what happens when both the center child and a grid one are present
+ * TODO bug: honor minimum size, use PERCENT to fill the remaining after all FILL are sized
  */
 public class CPane
 	extends Pane
