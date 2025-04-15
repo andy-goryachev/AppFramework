@@ -149,14 +149,14 @@ public class CPane
 	}
 
 
-	/** returns number of columns for the table portion of the layout (ignoring border components) */
+	/** returns number of columns for the table portion of the layout (ignoring border Nodes) */
 	public final int getCenterColumnCount()
 	{
 		return cols.size();
 	}
 	
 
-	/** returns number of rows for the table portion of the layout (ignoring border components) */
+	/** returns number of rows for the table portion of the layout (ignoring border Nodes) */
 	public final int getCenterRowCount()
 	{
 		return rows.size();
@@ -315,7 +315,7 @@ public class CPane
 	}
 	
 	
-	private Node getBorderComponent(CC cc)
+	private Node getBorderNode(CC cc)
 	{
 		int sz = entries.size();
 		for(int i=0; i<sz; i++)
@@ -335,12 +335,12 @@ public class CPane
 
 	private Node set(Node c, CC cc)
 	{
-		Node old = getBorderComponent(cc);
+		Node old = getBorderNode(cc);
 		if(old != c)
 		{
 			if(old != null)
 			{
-				removeLayoutComponent(old);
+				removeLayoutNode(old);
 			}
 			
 			if(c != null)
@@ -360,7 +360,7 @@ public class CPane
 
 	public final Node getRight()
 	{
-		return getBorderComponent(RIGHT);
+		return getBorderNode(RIGHT);
 	}
 
 	
@@ -372,7 +372,7 @@ public class CPane
 
 	public final Node getLeft()
 	{
-		return getBorderComponent(LEFT);
+		return getBorderNode(LEFT);
 	}
 
 
@@ -384,7 +384,7 @@ public class CPane
 
 	public final Node getTop()
 	{
-		return getBorderComponent(TOP);
+		return getBorderNode(TOP);
 	}
 
 	
@@ -396,7 +396,7 @@ public class CPane
 
 	public final Node getBottom()
 	{
-		return getBorderComponent(BOTTOM);
+		return getBorderNode(BOTTOM);
 	}
 	
 
@@ -446,7 +446,7 @@ public class CPane
 	}
 
 
-	private void removeLayoutComponent(Node nd)
+	private void removeLayoutNode(Node nd)
 	{
 		for(int i=entries.size()-1; i>=0; i--)
 		{
@@ -463,7 +463,7 @@ public class CPane
 	
 	public final void remove(Node c)
 	{
-		removeLayoutComponent(c);
+		removeLayoutNode(c);
 	}
 	
 	
@@ -629,7 +629,7 @@ public class CPane
 	//
 	
 	
-	/** component-constraint pair */
+	/** Node / cell constraint pair */
 	private static class Entry
 	{
 		public Node node;
@@ -746,7 +746,7 @@ public class CPane
 		}
 		
 		
-		// true if component spans a scaled column
+		// true if Node spans a scaled column
 		private boolean spansScaled(int start, int end)
 		{
 			for(int i=start; i<=end; i++)
@@ -785,12 +785,12 @@ public class CPane
 						CC cc = en.cc;
 						int end = end(cc);
 						
-						// only if the component ends on this row/col
+						// only if the Node ends on this row/col
 						if((!cc.border) && (end == i))
 						{
 							int start = start(cc);
 							
-							// layout does not need preferred sizes of components that span scaled columns
+							// layout does not need preferred sizes of Nodes that span scaled columns
 							// FIX but needs minimum
 							boolean skip = doingLayout && spansScaled(start, end);
 							if(!skip)
@@ -798,7 +798,7 @@ public class CPane
 								double other = otherDimension(en, doingLayout);
 								double d = snap(sizingMethod(pref, en.node, other));
 								
-								// amount of space component occupies in this column
+								// amount of space the Node occupies in this column
 								double cw = d - aggregateSize(start, i, snappedGap);
 								if(cw > w)
 								{
@@ -931,15 +931,15 @@ public class CPane
 		private final boolean ltr;
 		private final double snappedHGap;
 		private final double snappedVGap;
-		public Node topComp;
-		public Node bottomComp;
-		public Node leftComp;
-		public Node rightComp;
-		private double tableLeft;
-		private double tableRight;
-		private double tableTop;
-		private double tableBottom;
-		private double midHeight;
+		private Node topComp;
+		private Node bottomComp;
+		private Node leftComp;
+		private Node rightComp;
+		private double gridLeft;
+		private double gridRight;
+		private double gridTop;
+		private double gridBottom;
+		private double gridHeight;
 
 
 		public Helper()
@@ -950,7 +950,7 @@ public class CPane
 		}
 		
 
-		private void scanBorderComponents()
+		private void scanBorderNodes()
 		{		
 			for(int i=entries.size()-1; i>=0; i--)
 			{
@@ -1022,7 +1022,7 @@ public class CPane
 				h = Math.max(d, h);
 			}
 			
-			midHeight = h;
+			gridHeight = h;
 			
 			if(topComp != null)
 			{
@@ -1185,7 +1185,7 @@ public class CPane
 		
 			
 		// similar to border layout
-		private void layoutBorderComponents()
+		private void layoutBorderNodes()
 		{	
 			double top = snappedTopInset();
 			double bottom = snapPositionY(getHeight() - snappedBottomInset());
@@ -1223,17 +1223,17 @@ public class CPane
 				left = snapPositionX(left + w + snappedHGap);
 			}
 			
-			// space available for table layout components
-			tableLeft = left;
-			tableRight = right;
-			tableTop = top;
-			tableBottom = bottom;
+			// space available for the grid children
+			gridLeft = left;
+			gridRight = right;
+			gridTop = top;
+			gridBottom = bottom;
 		}
 		
 		
 		public double computeWidth(boolean pref)
 		{
-			scanBorderComponents();
+			scanBorderNodes();
 			
 			double d = computeBorderWidth(pref);
 			Axis hor = createHorAxis();
@@ -1244,24 +1244,24 @@ public class CPane
 		
 		public double computeHeight(boolean pref)
 		{
-			scanBorderComponents();
+			scanBorderNodes();
 			
 			double d = snapSizeY(computeBorderHeight(pref));
 			Axis ver = createVerAxis();
 			double h = ver.computeSizes(pref, false);
 
-			// height is maximum of border midsection or table section
-			h = snapSizeY(Math.max(h, midHeight) + (d - midHeight));
+			// height is maximum of border midsection or grid section
+			h = snapSizeY(Math.max(h, gridHeight) + (d - gridHeight));
 			return h;
 		}
 		
 		
-		public void sizeComponents(Axis hor, Axis ver)
+		public void layoutGridNodes(Axis hor, Axis ver)
 		{
-			hor.computePositions(tableLeft, snappedHGap);
-			ver.computePositions(tableTop, snappedVGap);
+			hor.computePositions(gridLeft, snappedHGap);
+			ver.computePositions(gridTop, snappedVGap);
 			
-			double xr = ltr ? 0 : tableRight + snappedRightInset();
+			double xr = ltr ? 0 : gridRight + snappedRightInset();
 			
 			int sz = entries.size();
 			for(int i=0; i<sz; i++)
@@ -1296,13 +1296,13 @@ public class CPane
 
 		public void layout()
 		{
-			scanBorderComponents();
-			layoutBorderComponents();
+			scanBorderNodes();
+			layoutBorderNodes();
 
 			Axis hor = createHorAxis();
 			double w = hor.computeSizes(true, true);
 
-			double dw = snapSizeX(tableRight - tableLeft - w);
+			double dw = snapSizeX(gridRight - gridLeft - w);
 			if(dw != 0.0)
 			{
 				hor.adjust(dw);
@@ -1312,13 +1312,13 @@ public class CPane
 			ver.otherAxis = hor;
 			double h = ver.computeSizes(true, true);
 			
-			double dh = snapSizeY(tableBottom - tableTop - h);
+			double dh = snapSizeY(gridBottom - gridTop - h);
 			if(dh != 0.0)
 			{
 				ver.adjust(dh);
 			}
 
-			sizeComponents(hor, ver);
+			layoutGridNodes(hor, ver);
 		}
 	}
 }
