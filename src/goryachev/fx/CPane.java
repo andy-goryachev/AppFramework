@@ -9,10 +9,8 @@ import javafx.css.Styleable;
 import javafx.css.StyleableProperty;
 import javafx.css.StyleablePropertyFactory;
 import javafx.geometry.HPos;
-import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 
@@ -20,9 +18,9 @@ import javafx.scene.layout.Region;
 /**
  * CPane is a Pane that lays out its children using a layout resembling a combination of BorderPane and GridPane.
  * That is, the children can be added either as (top/bottom/left/right) and/or in a grid in the center area.
+ * <p>
+ * NOTE: this pane ignores its children content bias.
  * 
- * TODO handle resizeable flag?
- * TODO clip the grid area when needed?
  * TODO bug: honor minimum size, use PERCENT to fill the remaining after all FILL are sized
  */
 public class CPane
@@ -58,7 +56,7 @@ public class CPane
 	}
 	
 	
-	/** sets horizontal gap for the table layout portion of the layout */
+	/** sets horizontal gap for the grid layout portion of the layout */
 	public final void setHGap(double gap)
 	{
 		hgap.setValue(gap);
@@ -78,7 +76,7 @@ public class CPane
 	}
 	
 
-	/** sets vertical gap for the table layout portion of the layout */
+	/** sets vertical gap for the grid layout portion of the layout */
 	public final void setVGap(double gap)
 	{
 		vgap.setValue(gap);
@@ -141,23 +139,16 @@ public class CPane
 		setPadding(FX.insets(top, right, bottom, left));
 	}
 	
-	
-	/** convenience method creates a right-aligned Label */
-	public final static Label rlabel(String text)
-	{
-		return FX.label(text, Pos.BASELINE_RIGHT);
-	}
 
-
-	/** returns number of columns for the table portion of the layout (ignoring border Nodes) */
-	public final int getCenterColumnCount()
+	/** returns number of columns for the grid portion of the layout (ignoring border Nodes) */
+	public final int getColumnCount()
 	{
 		return cols.size();
 	}
 	
 
-	/** returns number of rows for the table portion of the layout (ignoring border Nodes) */
-	public final int getCenterRowCount()
+	/** returns number of rows for the grid portion of the layout (ignoring border Nodes) */
+	public final int getRowCount()
 	{
 		return rows.size();
 	}
@@ -206,9 +197,9 @@ public class CPane
 		{
 			throw new IllegalArgumentException("negative row: " + ix);
 		}
-		if(ix >= getCenterRowCount())
+		if(ix >= getRowCount())
 		{
-			ix = getCenterRowCount();
+			ix = getRowCount();
 		}
 		
 		rows.add(ix, new AC());
@@ -230,7 +221,7 @@ public class CPane
 	
 	private AC getColumnSpec(int col)
 	{
-		while(getCenterColumnCount() <= col)
+		while(getColumnCount() <= col)
 		{
 			addColumn(PREF);
 		}
@@ -254,7 +245,7 @@ public class CPane
 	
 	private AC getRowSpec(int row)
 	{
-		while(getCenterRowCount() <= row)
+		while(getRowCount() <= row)
 		{
 			addRow(PREF);
 		}
@@ -1185,10 +1176,11 @@ public class CPane
 		
 			
 		// similar to border layout
-		private void layoutBorderNodes()
-		{	
+		private void placeBorderNodes()
+		{
+			// FIX this is wrong.  must take into account min sizes
 			double top = snappedTopInset();
-			double bottom = snapPositionY(getHeight() - snappedBottomInset());
+			double bottom = snapPositionY(getHeight() - snappedBottomInset()); // FIX incorrect, use sum of heights
 			double left = snappedLeftInset();
 			double right = snapPositionX(getWidth() - snappedRightInset());
 
@@ -1256,7 +1248,7 @@ public class CPane
 		}
 		
 		
-		public void layoutGridNodes(Axis hor, Axis ver)
+		public void placeGridNodes(Axis hor, Axis ver)
 		{
 			hor.computePositions(gridLeft, snappedHGap);
 			ver.computePositions(gridTop, snappedVGap);
@@ -1297,7 +1289,7 @@ public class CPane
 		public void layout()
 		{
 			scanBorderNodes();
-			layoutBorderNodes();
+			placeBorderNodes();
 
 			Axis hor = createHorAxis();
 			double w = hor.computeSizes(true, true);
@@ -1318,7 +1310,7 @@ public class CPane
 				ver.adjust(dh);
 			}
 
-			layoutGridNodes(hor, ver);
+			placeGridNodes(hor, ver);
 		}
 	}
 }
