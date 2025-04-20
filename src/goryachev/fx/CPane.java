@@ -22,6 +22,7 @@ import javafx.scene.layout.Region;
  * NOTE: this pane ignores its children content bias.
  * 
  * TODO bug: honor minimum size, use PERCENT to fill the remaining after all FILL are sized
+ * TODO explain sizing when both FILL and PERCENT are present
  */
 public class CPane
 	extends Pane
@@ -31,10 +32,10 @@ public class CPane
 	public static final double FILL = -1.0;
 	public static final double PREF = -2.0;
 	
-	public static final CC TOP = new CC(true);
-	public static final CC BOTTOM = new CC(true);
-	public static final CC LEFT = new CC(true);
-	public static final CC RIGHT = new CC(true);
+	public static final CC TOP = CC.border();
+	public static final CC BOTTOM = CC.border();
+	public static final CC LEFT = CC.border();
+	public static final CC RIGHT = CC.border();
 	
 	protected CList<Entry> entries = new CList<>();
 	protected CList<AC> cols = new CList<>();
@@ -96,13 +97,19 @@ public class CPane
 	}
 
 
-	@Override
-	public List<CssMetaData<? extends Styleable,?>> getCssMetaData()
+	public static List<CssMetaData<? extends Styleable,?>> getClassCssMetaData()
 	{
 		return SPF.getCssMetaData();
 	}
 
-	
+
+	@Override
+	public List<CssMetaData<? extends Styleable,?>> getCssMetaData()
+	{
+		return getClassCssMetaData();
+	}
+
+
 	/** sets horizontal and vertical gaps. */
 	public final void setGaps(double horizontal, double vertical)
 	{
@@ -206,14 +213,14 @@ public class CPane
 		
 		for(Entry en: entries)
 		{
-			if(en.cc.row >= ix)
+			if(en.cc.rowStart >= ix)
 			{
-				en.cc.row++;
-				en.cc.row2++;
+				en.cc.rowStart++;
+				en.cc.rowEnd++;
 			}
-			else if(en.cc.row2 >= ix)
+			else if(en.cc.rowEnd >= ix)
 			{
-				en.cc.row2++;
+				en.cc.rowEnd++;
 			}
 		}
 	}
@@ -312,7 +319,7 @@ public class CPane
 		for(int i=0; i<sz; i++)
 		{
 			Entry en = entries.get(i);
-			if(en.cc.border)
+			if(en.cc.isBorder())
 			{
 				if(en.cc == cc)
 				{
@@ -409,15 +416,15 @@ public class CPane
 			
 			entries.add(en);
 			
-			if(!cc.border)
+			if(!cc.isBorder())
 			{
-				int mxc = cc.col2;
+				int mxc = cc.colEnd;
 				while(cols.size() <= mxc)
 				{
 					cols.add(new AC());
 				}
 				
-				int mxr = cc.row2;
+				int mxr = cc.rowEnd;
 				while(rows.size() <= mxr)
 				{
 					rows.add(new AC());
@@ -574,17 +581,12 @@ public class CPane
 	/** cell contstraints */
 	private static class CC
 	{
-		/** starting column */
-		public int col;
-		/** ending  column */
-		public int col2;
-		/** starting row */
-		public int row;
-		/** ending row */
-		public int row2;
-		public AL horAlign;
-		public AL verAlign;
-		public boolean border;
+		private int colStart;
+		private int colEnd;
+		private int rowStart;
+		private int rowEnd;
+		private final AL horAlign;
+		private final AL verAlign;
 		
 		
 		public CC(int col, int row)
@@ -593,26 +595,39 @@ public class CPane
 		}
 		
 		
-		public CC(int col, int row, int col2, int row2)
+		public CC(int col, int row, int colEnd, int rowEnd)
 		{
-			this(col, row, col2, row2, AL.FULL, AL.FULL);
+			this(col, row, colEnd, rowEnd, AL.FULL, AL.FULL);
 		}
 		
 		
-		public CC(boolean border)
+		private CC(int col, int row, int colEnd, int rowEnd, AL horAlign, AL verAlign)
 		{
-			this.border = border;
-		}
-		
-		
-		public CC(int col, int row, int col2, int row2, AL horAlign, AL verAlign)
-		{
-			this.col = col;
-			this.row = row;
-			this.col2 = col2;
-			this.row2 = row2;
+			this.colStart = col;
+			this.rowStart = row;
+			this.colEnd = colEnd;
+			this.rowEnd = rowEnd;
 			this.horAlign = horAlign;
 			this.verAlign = verAlign;
+		}
+		
+		
+		public boolean isBorder()
+		{
+			return false;
+		}
+		
+		
+		private static CC border()
+		{
+			return new CC(-1, -1)
+			{
+				@Override
+				public boolean isBorder()
+				{
+					return true;
+				}
+			};
 		}
 	}
 	
@@ -777,7 +792,7 @@ public class CPane
 						int end = end(cc);
 						
 						// only if the Node ends on this row/col
-						if((!cc.border) && (end == i))
+						if((!cc.isBorder()) && (end == i))
 						{
 							int start = start(cc);
 							
@@ -941,14 +956,14 @@ public class CPane
 		}
 		
 
-		private void scanBorderNodes()
+		private void assignBorderNodes()
 		{		
 			for(int i=entries.size()-1; i>=0; i--)
 			{
 				Entry en = entries.get(i);
 				if(en.node.isManaged())
 				{
-					if(en.cc.border)
+					if(en.cc.isBorder())
 					{
 						CC cc = en.cc;
 						
@@ -1073,14 +1088,14 @@ public class CPane
 				@Override
 				public int start(CC cc)
 				{
-					return cc.col;
+					return cc.colStart;
 				}
 
 
 				@Override
 				public int end(CC cc)
 				{
-					return cc.col2;
+					return cc.colEnd;
 				}
 
 
@@ -1120,14 +1135,14 @@ public class CPane
 				@Override
 				public int start(CC cc)
 				{
-					return cc.row;
+					return cc.rowStart;
 				}
 
 
 				@Override
 				public int end(CC cc)
 				{
-					return cc.row2;
+					return cc.rowEnd;
 				}
 
 
@@ -1225,7 +1240,7 @@ public class CPane
 		
 		public double computeWidth(boolean pref)
 		{
-			scanBorderNodes();
+			assignBorderNodes();
 			
 			double d = computeBorderWidth(pref);
 			Axis hor = createHorAxis();
@@ -1236,7 +1251,7 @@ public class CPane
 		
 		public double computeHeight(boolean pref)
 		{
-			scanBorderNodes();
+			assignBorderNodes();
 			
 			double d = snapSizeY(computeBorderHeight(pref));
 			Axis ver = createVerAxis();
@@ -1265,13 +1280,13 @@ public class CPane
 				}
 				CC cc = en.cc;
 				
-				if(!cc.border)
+				if(!cc.isBorder())
 				{
-					double x = hor.pos[cc.col];
-					double w = snapSizeX(hor.pos[cc.col2 + 1] - x - snappedHGap);
+					double x = hor.pos[cc.colStart];
+					double w = snapSizeX(hor.pos[cc.colEnd + 1] - x - snappedHGap);
 	
-					double y = ver.pos[cc.row];
-					double h = snapSizeY(ver.pos[cc.row2 + 1] - y - snappedVGap);
+					double y = ver.pos[cc.rowStart];
+					double h = snapSizeY(ver.pos[cc.rowEnd + 1] - y - snappedVGap);
 
 					if(ltr)
 					{
@@ -1288,7 +1303,7 @@ public class CPane
 
 		public void layout()
 		{
-			scanBorderNodes();
+			assignBorderNodes();
 			placeBorderNodes();
 
 			Axis hor = createHorAxis();
