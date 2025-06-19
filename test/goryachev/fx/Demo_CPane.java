@@ -24,7 +24,7 @@ public class Demo_CPane extends Application
 	public void start(Stage stage) throws Exception
 	{
 		CPane cp = new CPane();
-		cp.setGaps(10, 10);
+		cp.setGaps(10);
 		cp.setPadding(20);
 		cp.addColumns
 		(

@@ -83,7 +83,6 @@ public class CommonStyles
 			// FIX
 			//radioButton(theme),
 			buttonPane(theme),
-			cpane(),
 						
 			// andy's hacks
 			
@@ -750,20 +749,6 @@ public class CommonStyles
 				borderWidth(0),
 				padding(10),
 				backgroundColor(FX.alpha(Color.GRAY, 0.1))
-			)
-		};
-	}
-	
-	
-	protected Object cpane()
-	{
-		return new Object[]
-		{
-			selector(CPane.STYLE).defines
-			(
-				padding(10),
-				prop("-ag-hgap", 10),
-				prop("-ag-vgap", 5)
 			)
 		};
 	}

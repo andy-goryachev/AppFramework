@@ -60,7 +60,7 @@ public class Test_CPane extends Application
 	private CPane createCPaneSimple()
 	{
 		CPane p = new CPane();
-		p.setGaps(10, 10);
+		p.setGaps(10);
 		p.setPadding(10);
 		p.addRows(CPane.PREF, CPane.PREF);
 		p.addColumns(CPane.PREF, CPane.FILL);
@@ -89,7 +89,7 @@ public class Test_CPane extends Application
 		info.setBackground(Background.fill(Color.gray(0.9)));
 
 		CPane p = new CPane();
-		p.setGaps(10, 7);
+		p.setGaps(10);
 		p.setPadding(10);
 		p.addColumns
 		(
@@ -158,7 +158,7 @@ public class Test_CPane extends Application
 		FX.addChangeListener(vgapField.textProperty(), true, (v) -> updateVGap(p, v));
 		
 		CPane bp = new CPane();
-		bp.setGaps(10, 7);
+		bp.setGaps(10);
 		bp.addColumns
 		(
 			CPane.PREF,

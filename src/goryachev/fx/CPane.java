@@ -28,74 +28,77 @@ public class CPane
 	extends Pane
 {
 	private static final Log log = Log.get("CPane");
-	public static final CssStyle STYLE = new CssStyle();
+
+	/**
+	 * Rows/columns with this constraint will be resized to fill the remaining space.
+	 */
 	public static final double FILL = -1.0;
+	/**
+	 * This constraint resizes the rows/columns to the preferred size of Nodes they contain.
+	 */
 	public static final double PREF = -2.0;
 	
-	public static final CC TOP = CC.border();
-	public static final CC BOTTOM = CC.border();
-	public static final CC LEFT = CC.border();
-	public static final CC RIGHT = CC.border();
+	private static final CC TOP = CC.border();
+	private static final CC BOTTOM = CC.border();
+	private static final CC LEFT = CC.border();
+	private static final CC RIGHT = CC.border();
 	
-	protected CList<Entry> entries = new CList<>();
-	protected CList<AC> cols = new CList<>();
-	protected CList<AC> rows = new CList<>();
 	private static final StyleablePropertyFactory<CPane> SPF = new StyleablePropertyFactory<>(Pane.getClassCssMetaData());
 	private final StyleableProperty<Number> hgap = SPF.createStyleableNumberProperty(this, "hgap", "-fx-hgap", s -> s.hgap);
 	private final StyleableProperty<Number> vgap = SPF.createStyleableNumberProperty(this, "vgap", "-fx-vgap", s -> s.vgap);
+	private final CList<Entry> entries = new CList<>();
+	private final CList<AC> cols = new CList<>();
+	private final CList<AC> rows = new CList<>();
 	
 
 	public CPane()
 	{
 	}
 	
-	
-	/** sets standard padding and gaps */
-	public final void setDefaultStyle()
+
+	/**
+	 * Specifies the horizontal gap.
+	 * @defaultValue 0
+	 */
+	public final ObservableValue<Number> hGapProperty()
 	{
-		STYLE.set(this);
+		return (ObservableValue<Number>)hgap;
 	}
 	
 	
-	/** sets horizontal gap for the grid layout portion of the layout */
 	public final void setHGap(double gap)
 	{
 		hgap.setValue(gap);
 	}
 
 
-	/** returns horizontal gap */
 	public final double getHGap()
 	{
 		return hgap.getValue().doubleValue();
 	}
 	
 	
-	public final ObservableValue<Number> hgapProperty()
+	/**
+	 * Specifies the vertical gap.
+	 * @defaultValue 0
+	 */
+	public final ObservableValue<Number> vGapProperty()
 	{
-		return (ObservableValue<Number>)hgap;
+		return (ObservableValue<Number>)vgap;
 	}
-	
 
-	/** sets vertical gap for the grid layout portion of the layout */
+
 	public final void setVGap(double gap)
 	{
 		vgap.setValue(gap);
 	}
 
 
-	/** returns vertical gap */
 	public final double getVGap()
 	{
 		return vgap.getValue().doubleValue();
 	}
 	
-	
-	public final ObservableValue<Number> vgapProperty()
-	{
-		return (ObservableValue<Number>)vgap;
-	}
-
 
 	public static List<CssMetaData<? extends Styleable,?>> getClassCssMetaData()
 	{
@@ -107,14 +110,6 @@ public class CPane
 	public List<CssMetaData<? extends Styleable,?>> getCssMetaData()
 	{
 		return getClassCssMetaData();
-	}
-
-
-	/** sets horizontal and vertical gaps. */
-	public final void setGaps(double horizontal, double vertical)
-	{
-		setHGap(horizontal);
-		setVGap(vertical);
 	}
 	
 	
@@ -1304,6 +1299,7 @@ public class CPane
 		public void layout()
 		{
 			assignBorderNodes();
+			// FIX move down?
 			placeBorderNodes();
 
 			Axis hor = createHorAxis();
