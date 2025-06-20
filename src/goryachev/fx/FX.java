@@ -252,15 +252,6 @@ public final class FX
 	}
 	
 	
-	/** creates a simple right-aligned label */
-	public static Label rlabel(String text)
-	{
-		Label n = new Label(text);
-		n.setAlignment(Pos.BASELINE_RIGHT);
-		return n;
-	}
-
-
 	/** creates a text segment */
 	public static Text text(Object ... attrs)
 	{
