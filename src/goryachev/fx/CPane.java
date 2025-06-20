@@ -533,21 +533,17 @@ public class CPane
 		public double width; // [0..1[ : percent, >=1 in pixels, <0 special
 		public double min;
 		public double max;
-		public int group;
-		public AL align;
 		
 		
 		public AC()
 		{
 			width = PREF;
-			align = AL.FULL;
 		}
 		
 		
 		public AC(double width)
 		{
 			this.width = width;
-			align = AL.FULL;
 		}
 		
 		
