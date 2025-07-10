@@ -356,4 +356,29 @@ public class TF
 		
 		return new RuntimeException("Mismatch at index " + mismatchIndex + ": " + get(left, mismatchIndex, "N/A") + " " + get(right, mismatchIndex, "N/A"));
 	}
+	
+	
+	@FunctionalInterface
+	public static interface TestRunnable
+	{
+		public void run() throws Throwable;
+	}
+	
+	
+	public static <T extends Throwable> void assertThrows(Class<T> expected, TestRunnable action)
+	{
+		try
+		{
+			action.run();
+		}
+		catch(Throwable e)
+		{
+			if(!expected.isAssignableFrom(e.getClass()))
+			{
+				TF.fail("Expecting " + expected + " but " + e + " was thrown.");
+			}
+			return;
+		}
+		TF.fail("Expecting " + expected + " but no exception was thrown.");
+	}
 }
