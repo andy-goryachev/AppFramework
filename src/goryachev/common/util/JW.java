@@ -1,8 +1,6 @@
 // Copyright © 2025-2025 Andy Goryachev <andy@goryachev.com>
 package goryachev.common.util;
-import goryachev.common.util.CList;
-import goryachev.common.util.Hex;
-import goryachev.common.util.SB;
+import java.lang.reflect.Array;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Map;
@@ -40,6 +38,33 @@ public class JW
 	{
 		state = new CList<>();
 		state.add(new State(Phase.IDLE));
+	}
+	
+	
+	/**
+	 * Convenience alias to {@code new JW().array();}
+	 */
+	public static JW a()
+	{
+		return new JW().array();
+	}
+	
+	
+	/**
+	 * Convenience alias to {@code new JW().object();}
+	 */
+	public static JW o()
+	{
+		return new JW().object();
+	}
+	
+	
+	/**
+	 * Convenience alias to {@code new JW().object().value(name, value);}
+	 */
+	public static JW v(String name, Object value)
+	{
+		return new JW().object().value(name, value);
 	}
 	
 	
@@ -406,9 +431,37 @@ public class JW
 			sb.append("]");
 			state.removeLast();
 		}
+		else if(x.getClass().isArray())
+		{
+			setPhase(Phase.ARRAY);
+			sb.append("[");
+			int sz = Array.getLength(x);
+			for(int i=0; i<sz; i++)
+			{
+				Object v = Array.get(x, i);
+				value(v);
+			}
+			sb.append("]");
+			state.removeLast();
+		}
+		else if(x.getClass().isPrimitive())
+		{
+			sb.append(x.toString());
+		}
+		else if(x instanceof Number)
+		{
+			sb.append(x.toString());
+		}
+		else if(x instanceof Boolean)
+		{
+			sb.append(x.toString());
+		}
 		else
 		{
-			sb.append(x);
+			String s = x.toString();
+			sb.append("\"");
+			appendText(s);
+			sb.append("\"");
 		}
 	}
 }

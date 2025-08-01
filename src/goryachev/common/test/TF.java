@@ -6,6 +6,7 @@ import goryachev.common.util.Dump;
 import goryachev.common.util.SB;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 
 /** Simple test framework */
@@ -65,6 +66,23 @@ public class TF
 			throw new TestException
 			(
 				message +
+				", unexpected value=" + 
+				Dump.describe(value) + 
+				", expected=" + 
+				Dump.describe(expected)
+			);
+		}
+	}
+	
+	
+	/** checks if two arguments are CKit.equals() and throws a meaningful exception if not */
+	public static void eq(Object value, Object expected, Supplier<Object> message)
+	{
+		if(CKit.notEquals(value, expected))
+		{
+			throw new TestException
+			(
+				message.get() +
 				", unexpected value=" + 
 				Dump.describe(value) + 
 				", expected=" + 
