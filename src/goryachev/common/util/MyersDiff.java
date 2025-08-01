@@ -49,28 +49,20 @@ public abstract class MyersDiff
 	
 	public static void compute(int[] a, int[] b, Client c) throws InterruptedException
 	{
-		int sizeA = a.length;
-		int sizeB = b.length;
-		
-		MyersDiff md = new MyersDiff(sizeA, sizeB)
+		new MyersDiff(a.length, b.length)
 		{
 			@Override
 			protected boolean equals(int ia, int ib)
 			{
 				return a[ia] == b[ib];
 			}
-		};
-		md.longestCommonSubSequence(0, sizeA, 0, sizeB);
-		md.generateChanges(c);
+		}.compute(c);
 	}
 	
 	
 	public static <T> void compute(List<T> a, List<T> b, Client c) throws InterruptedException
 	{
-		int sizeA = a.size();
-		int sizeB = b.size();
-		
-		MyersDiff md = new MyersDiff(sizeA, sizeB)
+		new MyersDiff(a.size(), b.size())
 		{
 			@Override
 			protected boolean equals(int ia, int ib)
@@ -79,27 +71,27 @@ public abstract class MyersDiff
 				Object vb = b.get(ib);
 				return CKit.equals(va, vb);
 			}
-		};
-		md.longestCommonSubSequence(0, sizeA, 0, sizeB);
-		md.generateChanges(c);
+		}.compute(c);
 	}
 	
 	
 	public static <T> void compute(CharSequence a, CharSequence b, Client c) throws InterruptedException
 	{
-		int sizeA = a.length();
-		int sizeB = b.length();
-		
-		MyersDiff md = new MyersDiff(sizeA, sizeB)
+		new MyersDiff(a.length(), b.length())
 		{
 			@Override
 			protected boolean equals(int ia, int ib)
 			{
 				return a.charAt(ia) == b.charAt(ib);
 			}
-		};
-		md.longestCommonSubSequence(0, sizeA, 0, sizeB);
-		md.generateChanges(c);
+		}.compute(c);
+	}
+	
+	
+	public void compute(Client c) throws InterruptedException
+	{
+		longestCommonSubSequence(0, sizeA, 0, sizeB);
+		generateChanges(c);
 	}
 	
 	
