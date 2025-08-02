@@ -38,17 +38,17 @@ public class CPane
 	 */
 	public static final double PREF = -2.0;
 	
-	private static final CC TOP = CC.border();
-	private static final CC BOTTOM = CC.border();
-	private static final CC LEFT = CC.border();
-	private static final CC RIGHT = CC.border();
+	static final CC TOP = CC.border();
+	static final CC BOTTOM = CC.border();
+	static final CC LEFT = CC.border();
+	static final CC RIGHT = CC.border();
 	
 	private static final StyleablePropertyFactory<CPane> SPF = new StyleablePropertyFactory<>(Pane.getClassCssMetaData());
 	private final StyleableProperty<Number> hgap = SPF.createStyleableNumberProperty(this, "hgap", "-fx-hgap", s -> s.hgap);
 	private final StyleableProperty<Number> vgap = SPF.createStyleableNumberProperty(this, "vgap", "-fx-vgap", s -> s.vgap);
-	private final CList<Entry> entries = new CList<>();
-	private final CList<AC> cols = new CList<>();
-	private final CList<AC> rows = new CList<>();
+	final CList<Entry> entries = new CList<>();
+	final CList<AC> cols = new CList<>();
+	final CList<AC> rows = new CList<>();
 	
 
 	public CPane()
@@ -460,7 +460,7 @@ public class CPane
 	}
 	
 	
-	private void setBounds(Node nd, double left, double top, double width, double height)
+	void setBounds(Node nd, double left, double top, double width, double height)
 	{
 		layoutInArea(nd, left, top, width, height, 0, HPos.CENTER, VPos.CENTER);
 	}
@@ -572,10 +572,10 @@ public class CPane
 	/** cell contstraints */
 	private static class CC
 	{
-		private int colStart;
-		private int colEnd;
-		private int rowStart;
-		private int rowEnd;
+		int colStart;
+		int colEnd;
+		int rowStart;
+		int rowEnd;
 		private final AL horAlign;
 		private final AL verAlign;
 		
@@ -609,7 +609,7 @@ public class CPane
 		}
 		
 		
-		private static CC border()
+		static CC border()
 		{
 			return new CC(-1, -1)
 			{
@@ -677,7 +677,7 @@ public class CPane
 		}
 		
 		
-		private void computePositions(double start, double gap)
+		void computePositions(double start, double gap)
 		{
 			int sz = size.length;
 			pos = new double[sz + 1];
@@ -757,7 +757,7 @@ public class CPane
 		}
 		
 		
-		private double computeSizes(boolean pref, boolean doingLayout)
+		double computeSizes(boolean pref, boolean doingLayout)
 		{
 			// total width
 			double total = 0;
@@ -833,7 +833,7 @@ public class CPane
 		}
 		
 		
-		private void adjust(double delta)
+		void adjust(double delta)
 		{
 			// space available for FILL/PERCENT columns
 			double available = delta;

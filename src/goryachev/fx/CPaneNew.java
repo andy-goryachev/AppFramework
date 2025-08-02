@@ -443,7 +443,7 @@ public class CPaneNew
 	//
 	
 	
-	private abstract class Axis
+	abstract class Axis
 	{
 		public double computeSize(boolean min, boolean forLayout)
 		{
