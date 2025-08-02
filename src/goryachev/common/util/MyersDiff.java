@@ -12,15 +12,40 @@ import java.util.List;
  */
 public abstract class MyersDiff
 {
+	/**
+	 * Receives the differences, identified by their elements' indexes.
+	 */
 	public interface Client
 	{
+		/**
+		 * Receives the unchanged block.
+		 * @param indexA the start index in the left side (a)
+		 * @param indexB the start index in the right side (b)
+		 * @param size the number of unchanged elements
+		 */
 		public void unchanged(int indexA, int indexB, int size);
 		
+		/**
+		 * Receives the deleted block.
+		 * @param indexA the start index in the left side (a)
+		 * @param size the number of deleted elements
+		 */
 		public void deleted(int indexA, int size);
 		
+		/**
+		 * Receives the added block.
+		 * @param indexA the start index in the right side (b)
+		 * @param size the number of added elements
+		 */
 		public void added(int indexB, int size);
 	}
 
+	/**
+	 * Determines equality of two elements.
+	 * 
+	 * @param indexA the index in the left side (a)
+	 * @param indexB the index in the right side (b)
+	 */
 	protected abstract boolean equals(int indexA, int indexB);
 	
 	private final int sizeA;
@@ -30,9 +55,14 @@ public abstract class MyersDiff
 	private final int[] downPath;
 	private final int[] upPath;
 	
-	private record ShortestMiddleSnake(int x, int y) { }
+	record ShortestMiddleSnake(int x, int y) { }
 	
 	
+	/**
+	 * Constructs the new instance.
+	 * @param sizeA the number of elements in the left side (a)
+	 * @param sizeB the number of elements in the left side (b)
+	 */
 	protected MyersDiff(int sizeA, int sizeB)
 	{ 
 		this.sizeA = sizeA;
@@ -47,6 +77,13 @@ public abstract class MyersDiff
 	}
 	
 	
+	/**
+	 * A convenience method to compute differences between two integer arrays.
+	 * @param a the left side input
+	 * @param b the right side input
+	 * @param c the client which receives the differences
+	 * @throws InterruptedException when the thread gets interrupted
+	 */
 	public static void compute(int[] a, int[] b, Client c) throws InterruptedException
 	{
 		new MyersDiff(a.length, b.length)
@@ -60,6 +97,13 @@ public abstract class MyersDiff
 	}
 	
 	
+	/**
+	 * A convenience method to compute differences between two lists.
+	 * @param a the left side input
+	 * @param b the right side input
+	 * @param c the client which receives the differences
+	 * @throws InterruptedException when the thread gets interrupted
+	 */
 	public static <T> void compute(List<T> a, List<T> b, Client c) throws InterruptedException
 	{
 		new MyersDiff(a.size(), b.size())
@@ -75,7 +119,14 @@ public abstract class MyersDiff
 	}
 	
 	
-	public static <T> void compute(CharSequence a, CharSequence b, Client c) throws InterruptedException
+	/**
+	 * A convenience method to compute differences between two {@code CharSequence}s.
+	 * @param a the left side input
+	 * @param b the right side input
+	 * @param c the client which receives the differences
+	 * @throws InterruptedException when the thread gets interrupted
+	 */
+	public static void compute(CharSequence a, CharSequence b, Client c) throws InterruptedException
 	{
 		new MyersDiff(a.length(), b.length())
 		{
@@ -88,6 +139,11 @@ public abstract class MyersDiff
 	}
 	
 	
+	/**
+	 * Computes the differences, sending the result to the specified client.
+	 * @param c the client which receives the differences
+	 * @throws InterruptedException when the thread gets interrupted
+	 */
 	public void compute(Client c) throws InterruptedException
 	{
 		longestCommonSubSequence(0, sizeA, 0, sizeB);
@@ -229,6 +285,7 @@ public abstract class MyersDiff
 		int lineB = 0;
 		int ustartA = 0;
 		int ustartB = 0;
+		
 		while((lineA < sizeA) || (lineB < sizeB))
 		{
 			if((lineA < sizeA) && (!modifiedA.get(lineA)) && (lineB < sizeB) && (!modifiedB.get(lineB)))
