@@ -1,9 +1,11 @@
 // Copyright © 2025-2025 Andy Goryachev <andy@goryachev.com>
 package goryachev.common.util;
 import java.lang.reflect.Array;
+import java.text.DecimalFormat;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Function;
 
 
 /**
@@ -32,6 +34,7 @@ public class JW
 	
 	private final SB sb = new SB();
 	private final CList<State> state;
+	private Function<Object,String> formatter;
 	
 	
 	public JW()
@@ -42,29 +45,76 @@ public class JW
 	
 	
 	/**
-	 * Convenience alias to {@code new JW().array();}
+	 * Convenience method which converts an array of values into a JSON string.
 	 */
-	public static JW a()
+	public static String arr(Object ... values)
 	{
-		return new JW().array();
+		return new JW().array(values).toString();
 	}
 	
 	
 	/**
-	 * Convenience alias to {@code new JW().object();}
+	 * Convenience method which converts a single object comprised of a number of name-value pairs into a JSON string.
 	 */
-	public static JW o()
+	public static String obj(Object ... nameValuePairs)
 	{
-		return new JW().object();
+		return new JW().object().values(nameValuePairs).toString();
 	}
 	
 	
 	/**
-	 * Convenience alias to {@code new JW().object().value(name, value);}
+	 * Appends an array.
 	 */
-	public static JW v(String name, Object value)
+	public JW array(Object ... items)
 	{
-		return new JW().object().value(name, value);
+		array();
+		for(Object v: items)
+		{
+			value(v);
+		}
+		end();
+		return this;
+	}
+	
+	
+	public JW withFormat(Function<Object,String> formatter)
+	{
+		this.formatter = formatter;
+		return this;
+	}
+	
+	
+	public JW withNumberFormat(String pattern)
+	{
+		DecimalFormat f = new DecimalFormat(pattern);
+		this.formatter = (v) ->
+		{
+			if(v instanceof Number n)
+			{
+				return f.format(n);
+			}
+			else
+			{
+				return v.toString();
+			}
+		};
+		return this;
+	}
+	
+
+	/**
+	 * Appends a series of name-value pairs.
+	 */
+	public JW values(Object ... nameValuePairs)
+	{
+		int sz = nameValuePairs.length;
+		for(int i=0; i<sz; )
+		{
+			String name = (String)nameValuePairs[i++];
+			Object value = nameValuePairs[i++];
+			value(name, value);
+		}
+		return this;
 	}
 	
 	
@@ -307,7 +357,7 @@ public class JW
 	}
 	
 	
-	private static int firstSpecialCharacter(CharSequence text)
+	private void appendText(CharSequence text)
 	{
 		int len = text.length();
 		for(int i=0; i<len; i++)
@@ -316,56 +366,40 @@ public class JW
 			switch(c)
 			{
 			case '"':
+				sb.append("\\\"");
+				break;
 			case '\\':
-			case '\t':
+				sb.append("\\\\");
+				break;
 			case '\b':
-			case '\n':
-			case '\r':
+				sb.append("\\b");
+				break;
 			case '\f':
-				return i;
-			}
-		}
-		return -1;
-	}
-	
-	
-	private void appendText(CharSequence text)
-	{
-		int ix = firstSpecialCharacter(text);
-		if(ix < 0)
-		{
-			sb.append(text);
-		}
-		else
-		{
-			if(ix > 0)
-			{
-				sb.append(text, 0, ix);
-			}
-			int len = text.length();
-			for(int i=ix; i<len; i++)
-			{
-				char c = text.charAt(i);
-				switch(c)
+				sb.append("\\f");
+				break;
+			case '\n':
+				sb.append("\\n");
+				break;
+			case '\r':
+				sb.append("\\r");
+				break;
+			case '\t':
+				sb.append("\\t");
+				break;
+			case '/':
+				sb.append("\\/");
+				break;
+			default:
+				if(c < 0x20)
 				{
-				case '"':
-					sb.append("\\\"");
-					break;
-				case '\\':
-					sb.append("\\\\");
-				case '\t':
-					sb.append("\\t");
-				case '\b':
-					sb.append("\\b");
-				case '\n':
-					sb.append("\\n");
-				case '\r':
-					sb.append("\\r");
-				case '\f':
-					sb.append("\\f");
-				default:
+					sb.append("\\u");
+					sb.hex4(c);
+				}
+				else
+				{
 					sb.append(c);
 				}
+				break;
 			}
 		}
 	}
@@ -377,91 +411,103 @@ public class JW
 		{
 			sb.append("null");
 		}
-		else if(x instanceof Double d)
+		else if(formatter == null)
 		{
-			long v = (long)d.doubleValue();
-			if(v == d)
+			if(x instanceof Number n)
 			{
-				sb.append(v);
+				if(x instanceof Double d)
+				{
+					long v = (long)d.doubleValue();
+					if(v == d)
+					{
+						sb.append(v);
+						return;
+					}
+				}
+				else if(x instanceof Float d)
+				{
+					int v = (int)d.floatValue();
+					if(v == d)
+					{
+						sb.append(v);
+						return;
+					}
+				}
+				sb.append(n.toString());
+			}
+			else if(x instanceof CharSequence s)
+			{
+				sb.append("\"");
+				appendText(s);
+				sb.append("\"");
+			}
+			else if(x instanceof Map m)
+			{
+				setPhase(Phase.OBJECT);
+				sb.append("{");
+				for(Map.Entry<?,?> en: ((Map<?,?>)m).entrySet())
+				{
+					String k = (String)en.getKey();
+					Object v = en.getValue();
+					value(k, v);
+				}
+				sb.append("}");
+				state.removeLast();
+			}
+			else if(x instanceof Collection c)
+			{
+				setPhase(Phase.ARRAY);
+				sb.append("[");
+				for(Object v: c)
+				{
+					value(v);
+				}
+				sb.append("]");
+				state.removeLast();
+			}
+			else if(x.getClass().isArray())
+			{
+				setPhase(Phase.ARRAY);
+				sb.append("[");
+				int sz = Array.getLength(x);
+				for(int i=0; i<sz; i++)
+				{
+					Object v = Array.get(x, i);
+					value(v);
+				}
+				sb.append("]");
+				state.removeLast();
+			}
+			else if(x.getClass().isPrimitive())
+			{
+				sb.append(x.toString());
+			}
+			else if(x instanceof Boolean)
+			{
+				sb.append(x.toString());
 			}
 			else
 			{
-				sb.append(d);
+				String s = x.toString();
+				sb.append("\"");
+				appendText(s);
+				sb.append("\"");
 			}
-		}
-		else if(x instanceof Float d)
-		{
-			int v = (int)d.floatValue();
-			if(v == d)
-			{
-				sb.append(v);
-			}
-			else
-			{
-				sb.append(d);
-			}
-		}
-		else if(x instanceof CharSequence s)
-		{
-			sb.append("\"");
-			appendText(s);
-			sb.append("\"");
-		}
-		else if(x instanceof Map m)
-		{
-			setPhase(Phase.OBJECT);
-			sb.append("{");
-			for(Map.Entry<?,?> en: ((Map<?,?>)m).entrySet())
-			{
-				String k = (String)en.getKey();
-				Object v = en.getValue();
-				value(k, v);
-			}
-			sb.append("}");
-			state.removeLast();
-		}
-		else if(x instanceof Collection c)
-		{
-			setPhase(Phase.ARRAY);
-			sb.append("[");
-			for(Object v: c)
-			{
-				value(v);
-			}
-			sb.append("]");
-			state.removeLast();
-		}
-		else if(x.getClass().isArray())
-		{
-			setPhase(Phase.ARRAY);
-			sb.append("[");
-			int sz = Array.getLength(x);
-			for(int i=0; i<sz; i++)
-			{
-				Object v = Array.get(x, i);
-				value(v);
-			}
-			sb.append("]");
-			state.removeLast();
-		}
-		else if(x.getClass().isPrimitive())
-		{
-			sb.append(x.toString());
-		}
-		else if(x instanceof Number)
-		{
-			sb.append(x.toString());
-		}
-		else if(x instanceof Boolean)
-		{
-			sb.append(x.toString());
 		}
 		else
 		{
-			String s = x.toString();
-			sb.append("\"");
-			appendText(s);
-			sb.append("\"");
+			if(x instanceof Number n)
+			{
+				String s = formatter.apply(n);
+				sb.append(s);
+			}
+			else
+			{
+				String s = formatter.apply(x);
+				sb.append("\"");
+				appendText(s);
+				sb.append("\"");
+			}
 		}
 	}
 }

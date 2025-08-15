@@ -29,7 +29,7 @@ public class TF
 	
 
 	/** checks if two arguments are CKit.equals() and throws a meaningful exception if not */
-	public static void eq(Object value, Object expected)
+	public static void eq(Object expected, Object value)
 	{
 		if(CKit.notEquals(value, expected))
 		{
@@ -45,7 +45,7 @@ public class TF
 	
 	
 	/** checks if two arguments are not CKit.equals() and throws a meaningful exception if not */
-	public static void notEquals(Object value, Object expected)
+	public static void notEquals(Object expected, Object value)
 	{
 		if(CKit.equals(value, expected))
 		{
@@ -59,7 +59,7 @@ public class TF
 	
 	
 	/** checks if two arguments are CKit.equals() and throws a meaningful exception if not */
-	public static void eq(Object value, Object expected, Object message)
+	public static void eq(Object expected, Object value, String message)
 	{
 		if(CKit.notEquals(value, expected))
 		{
@@ -76,7 +76,7 @@ public class TF
 	
 	
 	/** checks if two arguments are CKit.equals() and throws a meaningful exception if not */
-	public static void eq(Object value, Object expected, Supplier<Object> message)
+	public static void eq(Object expected, Object value, Supplier<String> message)
 	{
 		if(CKit.notEquals(value, expected))
 		{
