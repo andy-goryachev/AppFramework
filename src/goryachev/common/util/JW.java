@@ -262,10 +262,12 @@ public class JW
 		case ARRAY:
 			// or maybe just an inline object?
 			throw new IllegalStateException("name/value in an array");
-		case IDLE:
-			throw new IllegalStateException("name/value outside of an object");
 		case NAME:
 			throw new IllegalStateException("expecting a value");
+		case IDLE:
+			setPhase(Phase.OBJECT);
+			sb.append("{");
+			// fall through
 		case OBJECT:
 			separator(st);
 			sb.append("\"");
