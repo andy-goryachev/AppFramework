@@ -6,12 +6,13 @@ Provides a convenient base for JavaFX applications.
 
 ## Features
 
-- remembers window locations and user preferences
+- remembers window locations and user choices
 - demonstrates common UI layouts (list/table with attached detail view, etc.)
 - runtime stylesheet generator
 
 This is pretty much work in progress, so don't even think of using it in production.
-The APIs is guaranteed to change.
+
+The APIs are guaranteed to change.
 
 ![screenshot](doc/screenshot.png)
 
