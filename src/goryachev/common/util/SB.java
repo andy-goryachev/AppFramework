@@ -546,6 +546,7 @@ public class SB
 	}
 
 
+	@Override
 	public void getChars(int srcBegin, int srcEnd, char[] dst, int dstBegin)
 	{
 		sb.getChars(srcBegin, srcEnd, dst, dstBegin);
