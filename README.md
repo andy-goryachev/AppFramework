@@ -33,7 +33,7 @@ The main application window:
 
 ## Software Requirements
 
-Requires JDK 24+ with JavaFX 24+.
+Requires JavaFX 26+ with a matching JDK.
 
 
 
