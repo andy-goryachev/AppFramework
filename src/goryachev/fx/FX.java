@@ -1,4 +1,4 @@
-// Copyright © 2016-2025 Andy Goryachev <andy@goryachev.com>
+// Copyright © 2016-2026 Andy Goryachev <andy@goryachev.com>
 package goryachev.fx;
 import goryachev.common.log.Log;
 import goryachev.common.util.CKit;
@@ -2366,7 +2366,7 @@ public final class FX
 				@Override
 				public Object fromString(String s)
 				{
-					throw new Error("not supported");
+					return null;
 				}
 			};
 		}
