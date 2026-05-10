@@ -7,5 +7,5 @@ package demo.appfw;
  */
 public class Version
 {
-	public static final String COPYRIGHT = "copyright © 2025 andy goryachev";
+	public static final String COPYRIGHT = "copyright © 2026 andy goryachev";
 }
