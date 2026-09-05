@@ -8,9 +8,23 @@ import java.util.Map;
 import java.util.function.Function;
 
 
-/**
- * JSON Writer for simple toString() output.
- */
+/// Simple utility for generating JSON output (mostly intended for `toString()` implementations).
+/// 
+/// Usage example:
+/// ```
+/// @Override
+/// public String toString()
+/// {
+///     return new JW().
+///         value("field1", 1).
+///         array().
+///             value(2).
+///             value(3).
+///         toString();
+/// } 
+/// ```
+/// The code above produces the following output:
+/// ``
 public class JW
 {
 	private enum Phase
@@ -24,11 +38,23 @@ public class JW
 	private static class State
 	{
 		public final Phase phase;
-		public boolean separator;
+		private boolean separator;
 		
 		public State(Phase phase)
 		{
 			this.phase = phase;
+		}
+		
+		
+		public boolean separator()
+		{
+			return separator;
+		}
+		
+		
+		public void setSeparator()
+		{
+			separator = true;
 		}
 	}
 	
@@ -41,6 +67,13 @@ public class JW
 	{
 		state = new CList<>();
 		state.add(new State(Phase.IDLE));
+	}
+	
+	
+	public JW(String prefix)
+	{
+		this();
+		sb.append(prefix);
 	}
 	
 	
@@ -175,6 +208,13 @@ public class JW
 		{
 		case ARRAY:
 			sb.append("]");
+			st = state();
+			switch(st.phase)
+			{
+			case NAME:
+				state.removeLast();
+				break;
+			}
 			break;
 		case IDLE:
 			throw new IllegalStateException("no object/array to end");
@@ -267,6 +307,7 @@ public class JW
 		case IDLE:
 			setPhase(Phase.OBJECT);
 			sb.append("{");
+			st = state.getLast();
 			// fall through
 		case OBJECT:
 			separator(st);
@@ -342,13 +383,13 @@ public class JW
 	
 	private void separator(State st)
 	{
-		if(st.separator)
+		if(st.separator())
 		{
 			sb.append(",");
 		}
 		else
 		{
-			st.separator = true;
+			st.setSeparator();
 		}
 	}
 	

@@ -172,7 +172,7 @@ public class WindowMonitor
 					{
 						if(!isIgnore(w))
 						{
-							log.debug("added: %s", w);
+							log.debug("added: {0}", w);
 							FxFramework.restore(w);
 							applyStyleSheet(w);
 						}
@@ -184,7 +184,7 @@ public class WindowMonitor
 					{
 						if(!isIgnore(w))
 						{
-							log.debug("removed: %s", w);
+							log.debug("removed: {0}", w);
 							// the only problem here is that window is already hidden - does it matter?
 							// if it does, need to listen to WindowEvent.WINDOW_HIDING event
 							FxFramework.store(w);

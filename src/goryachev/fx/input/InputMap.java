@@ -185,6 +185,11 @@ public class InputMap
 	
 	public void setSkinInputMap(SkinInputMap m)
 	{
+		if(skinInputMap == m)
+		{
+			return;
+		}
+
 		if(skinInputMap != null)
 		{
 			// remove any skin handlers

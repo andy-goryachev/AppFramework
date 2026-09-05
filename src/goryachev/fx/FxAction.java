@@ -21,7 +21,7 @@ import javafx.scene.control.ToggleButton;
  *    public final FxAction backAction = new FxAction(this::actionBack);
  */
 public class FxAction
-    implements EventHandler<ActionEvent>
+	implements EventHandler<ActionEvent>
 {
 	protected static final Log log = Log.get("FxAction");
 	public static final FxAction DISABLED = new FxAction(null, false);

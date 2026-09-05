@@ -1148,18 +1148,11 @@ public final class FX
 	
 	
 	/** 
-	 * attach a popup menu to a node.
-	 * WARNING: sometimes, as the case is with TableView/FxTable header, 
-	 * the requested node gets created by the skin at some later time.
-	 * In this case, additional dance must be performed, see for example
-	 * FxTable.setHeaderPopupMenu()   
+	 * Attaches the popup menu to the node.
 	 */
 	public static void setPopupMenu(Node owner, Supplier<ContextMenu> generator)
 	{
-		if(owner == null)
-		{
-			throw new NullPointerException("cannot attach popup menu to null");
-		}
+		Objects.requireNonNull(owner);
 		
 		owner.setOnContextMenuRequested((ev) ->
 		{
@@ -1186,6 +1179,10 @@ public final class FX
 							};
 							
 							owner.addEventFilter(MouseEvent.MOUSE_PRESSED, li);
+							m.setOnHidden((_) ->
+							{
+								owner.removeEventFilter(MouseEvent.MOUSE_PRESSED, li);
+							});
 							m.show(owner, ev.getScreenX(), ev.getScreenY());
 						});
 						ev.consume();
@@ -1449,24 +1446,24 @@ public final class FX
 	/** converts non-null Color to #RRGGBBAA */
 	public static String toFormattedColor(Color c)
 	{
-        int r = toInt8(c.getRed());
-        int g = toInt8(c.getGreen());
-        int b = toInt8(c.getBlue());
-        int a = toInt8(c.getOpacity());
+		int r = toInt8(c.getRed());
+		int g = toInt8(c.getGreen());
+		int b = toInt8(c.getBlue());
+		int a = toInt8(c.getOpacity());
 		return String.format("#%02X%02X%02X%02X", r, g, b, a);
 	}
-	
-	
+
+
 	/** converts non-null Color to #RRGGBB */
 	public static String toFormattedColorRGB(Color c)
 	{
-        int r = toInt8(c.getRed());
-        int g = toInt8(c.getGreen());
-        int b = toInt8(c.getBlue());
+		int r = toInt8(c.getRed());
+		int g = toInt8(c.getGreen());
+		int b = toInt8(c.getBlue());
 		return String.format("#%02X%02X%02X", r, g, b);
 	}
-	
-	
+
+
 	/** converts Color to RRGGBBAA, or null */
 	public static String toHexColor(Color c)
 	{
@@ -1474,10 +1471,10 @@ public final class FX
 		{
 			return null;
 		}
-        int r = toInt8(c.getRed());
-        int g = toInt8(c.getGreen());
-        int b = toInt8(c.getBlue());
-        int a = toInt8(c.getOpacity());
+		int r = toInt8(c.getRed());
+		int g = toInt8(c.getGreen());
+		int b = toInt8(c.getBlue());
+		int a = toInt8(c.getOpacity());
 		return String.format("%02X%02X%02X%02X", r, g, b, a);
 	}
 	
@@ -1657,22 +1654,22 @@ public final class FX
 	/** converts java fx Color to a 32 bit RGBA integer */
 	public static Integer toRGBA(Color c)
 	{
-        int r = (int)Math.round(c.getRed() * 255.0);
-        int g = (int)Math.round(c.getGreen() * 255.0);
-        int b = (int)Math.round(c.getBlue() * 255.0);
-        int a = (int)Math.round(c.getOpacity() * 255.0);
+		int r = (int)Math.round(c.getRed() * 255.0);
+		int g = (int)Math.round(c.getGreen() * 255.0);
+		int b = (int)Math.round(c.getBlue() * 255.0);
+		int a = (int)Math.round(c.getOpacity() * 255.0);
 		return r | (g << 8) | (b << 16) | (a << 24);
 	}
-	
-	
+
+
 	/** copies text to clipboard.  does nothing if text is null */
 	public static void copy(String text)
 	{
 		if(text != null)
 		{
 			ClipboardContent cc = new ClipboardContent();
-            cc.putString(text);
-            Clipboard.getSystemClipboard().setContent(cc);
+			cc.putString(text);
+			Clipboard.getSystemClipboard().setContent(cc);
 		}
 	}
 	

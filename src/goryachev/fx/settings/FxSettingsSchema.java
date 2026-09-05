@@ -151,7 +151,7 @@ public abstract class FxSettingsSchema
 		}
 		
 		Node n = w.getScene().getRoot();
-        storeNode(n);
+		storeNode(n);
 	}
 	
 	
@@ -189,7 +189,7 @@ public abstract class FxSettingsSchema
 			}
 			
 			Node n = w.getScene().getRoot();
-            restoreNode(n);
+			restoreNode(n);
 		}
 	}
 	

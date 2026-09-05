@@ -56,9 +56,9 @@ public class RandomAccessByteBuffer
 		{
 			size = position;
 		}
-	}        
-        
-	
+	}
+
+
 	public void writeBoolean(boolean d) throws IOException
 	{
 		writeByte(d ? 1 : 0);
@@ -160,7 +160,7 @@ public class RandomAccessByteBuffer
 			}
 		}
 	}
-    
+
 
 	public void seek(int pos) throws IOException
 	{

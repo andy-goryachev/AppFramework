@@ -17,17 +17,17 @@ public abstract class FxFormatter
 	public FxFormatter()
 	{
 	}
-	
- 
-    @Override
+
+
+	@Override
 	public Object fromString(String string)
-    {
-    	throw new Error("FxFormatter: fromString not supported");
-    }
-    
-    
-    public String format(Object x)
-    {
-    	return toString(x);
-    }
+	{
+		throw new Error("FxFormatter: fromString not supported");
+	}
+
+
+	public String format(Object x)
+	{
+		return toString(x);
+	}
 }

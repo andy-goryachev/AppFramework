@@ -9,7 +9,7 @@ import java.util.List;
  * In-memory map-based Settings Provider.
  */
 public abstract class SettingsProviderBase
-    implements GlobalSettingsProvider
+	implements GlobalSettingsProvider
 {
 	protected abstract void saveSettings();
 

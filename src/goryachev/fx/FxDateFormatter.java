@@ -18,13 +18,13 @@ public class FxDateFormatter
 		format = new SimpleDateFormat(pattern);
 	}
 	
-	
-    public String format(long t)
-    {
-    	return format.format(t);
-    }
 
-	
+	public String format(long t)
+	{
+		return format.format(t);
+	}
+
+
 	@Override
 	public String toString(Object x)
 	{

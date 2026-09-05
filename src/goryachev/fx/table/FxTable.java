@@ -553,15 +553,15 @@ public class FxTable<T>
 	}
 	
 	
-    /**
-     * Equivalent of table.setSortPolicy().
-     * 
-     * A sort policy attempts to sort the items in the table
-     * (for example, {@code FXCollections.sort(tableView.getItems())})
-     * and return true if sorting was successful and false (or null) otherwise.
-     * 
-     * @see TableView#DEFAULT_SORT_POLICY
-     */
+	/**
+	 * Equivalent of table.setSortPolicy().
+	 * 
+	 * A sort policy attempts to sort the items in the table
+	 * (for example, {@code FXCollections.sort(tableView.getItems())})
+	 * and return true if sorting was successful and false (or null) otherwise.
+	 * 
+	 * @see TableView#DEFAULT_SORT_POLICY
+	 */
 	public void setSortPolicy(Callback<TableView<T>,Boolean> policy)
 	{
 		table.setSortPolicy(policy);

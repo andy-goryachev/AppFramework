@@ -8,8 +8,8 @@ import goryachev.common.util.SStream;
  */
 public interface SSConverter<T>
 {
-    public abstract SStream toStream(T object);
+	public abstract SStream toStream(T object);
 
 
-    public abstract T fromStream(SStream s);
+	public abstract T fromStream(SStream s);
 }
